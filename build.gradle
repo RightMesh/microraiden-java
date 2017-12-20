@@ -32,6 +32,9 @@ dependencies {
     
     // used for ethereum pub/priv key, transaction signing etc.
     implementation (group: 'org.ethereum', name: 'ethereumj-core', version: '1.4.1-RELEASE')
+    
+    // https://mvnrepository.com/artifact/commons-io/commons-io
+    compile group: 'commons-io', name: 'commons-io', version: '2.5'
 }
 
 // Define the main class for the application
