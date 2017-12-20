@@ -1,5 +1,6 @@
 import java.lang.reflect.*;
 import java.util.Arrays;
+import org.ethereum.crypto.ECKey;
 
 /*
  * CLI for the MicroRaiden client
