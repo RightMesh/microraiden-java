@@ -1,5 +1,7 @@
 .gradle
 /build/
+/logs/
+*.pkey
 
 # Ignore Gradle GUI config
 gradle-app.setting
