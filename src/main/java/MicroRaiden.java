@@ -23,7 +23,9 @@ import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.ethereum.core.CallTransaction;
+import org.ethereum.core.Transaction;
 import org.ethereum.crypto.ECKey;
+import org.ethereum.util.ByteUtil;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -33,12 +35,32 @@ import org.json.simple.parser.ParseException;
  */
 public class MicroRaiden {
 	private static final String rpcAddress="http://localhost:8545";
-	private static final String channelManagerAddr="0x488184931e6C37FB0dd1c375570c7470Dcf211C5";
-	private static final String customTokenAddr="0x5e0f57e2c2e05434d57d35d90f0f9F676B779F5e";
+	private static final String channelManagerAddr="0x4913f12d38c04094cF1E382d0ffEEf3036eCCa32";
+	private static final String customTokenAddr="0x0fC373426c87F555715E6fE673B07Fe9E7f0E6e7";
 	private static final String toAddr="0xF4ABFf26965D10E2162d26FEaf7E16349fA201fF";
-	private static final String abi="[{\"constant\":true,\"inputs\":[],\"name\":\"challenge_period\",\"outputs\":[{\"name\":\"\",\"type\":\"uint32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_sender_address\",\"type\":\"address\"},{\"name\":\"_receiver_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"}],\"name\":\"getChannelInfo\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"},{\"name\":\"\",\"type\":\"uint192\"},{\"name\":\"\",\"type\":\"uint32\"},{\"name\":\"\",\"type\":\"uint192\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_receiver_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"name\":\"_balance\",\"type\":\"uint192\"},{\"name\":\"_balance_msg_sig\",\"type\":\"bytes\"}],\"name\":\"extractBalanceProofSignature\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_receiver_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"name\":\"_balance\",\"type\":\"uint192\"},{\"name\":\"_balance_msg_sig\",\"type\":\"bytes\"},{\"name\":\"_closing_sig\",\"type\":\"bytes\"}],\"name\":\"cooperativeClose\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_sender_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"name\":\"_balance\",\"type\":\"uint192\"},{\"name\":\"_closing_sig\",\"type\":\"bytes\"}],\"name\":\"extractClosingSignature\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_receiver_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"name\":\"_balance\",\"type\":\"uint192\"}],\"name\":\"uncooperativeClose\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"version\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_receiver_address\",\"type\":\"address\"},{\"name\":\"_deposit\",\"type\":\"uint192\"}],\"name\":\"createChannelERC20\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_receiver_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"}],\"name\":\"settle\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"channel_deposit_bugbounty_limit\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"closing_requests\",\"outputs\":[{\"name\":\"closing_balance\",\"type\":\"uint192\"},{\"name\":\"settle_block_number\",\"type\":\"uint32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"channels\",\"outputs\":[{\"name\":\"deposit\",\"type\":\"uint192\"},{\"name\":\"open_block_number\",\"type\":\"uint32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_sender_address\",\"type\":\"address\"},{\"name\":\"_receiver_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"}],\"name\":\"getKey\",\"outputs\":[{\"name\":\"data\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_sender_address\",\"type\":\"address\"},{\"name\":\"_deposit\",\"type\":\"uint256\"},{\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"tokenFallback\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_receiver_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"name\":\"_added_deposit\",\"type\":\"uint192\"}],\"name\":\"topUpERC20\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"token\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_token_address\",\"type\":\"address\"},{\"name\":\"_challenge_period\",\"type\":\"uint32\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_sender\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_receiver\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"_deposit\",\"type\":\"uint192\"}],\"name\":\"ChannelCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_sender\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_receiver\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"indexed\":false,\"name\":\"_added_deposit\",\"type\":\"uint192\"}],\"name\":\"ChannelToppedUp\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_sender\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_receiver\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"indexed\":false,\"name\":\"_balance\",\"type\":\"uint192\"}],\"name\":\"ChannelCloseRequested\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_sender\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_receiver\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"indexed\":false,\"name\":\"_balance\",\"type\":\"uint192\"}],\"name\":\"ChannelSettled\",\"type\":\"event\"}]";
+	private static final String tokenAbi="[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_spender\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"mint\",\"outputs\":[],\"payable\":true,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"multiplier\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_from\",\"type\":\"address\"},{\"name\":\"_to\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"name\":\"\",\"type\":\"uint8\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"transferFunds\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"version\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner_address\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"},{\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"transfer\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"},{\"name\":\"_spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"inputs\":[{\"name\":\"initial_supply\",\"type\":\"uint256\"},{\"name\":\"token_name\",\"type\":\"string\"},{\"name\":\"token_symbol\",\"type\":\"string\"},{\"name\":\"decimal_units\",\"type\":\"uint8\"}],\"payable\":false,\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_to\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_num\",\"type\":\"uint256\"}],\"name\":\"Minted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_owner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_spender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"}]";
     private static final String appendingZerosForETH="1000000000000000000";
     private static final String appendingZerosForRMT="1000000000000000000";
+    private static BigInteger gasPrice=new BigInteger("5000000000");
+    private static final int INTERVAL_CHECK_TRANS_DONE=5000;
+    private static boolean running=false;
+    private String mytransactionID = null;
+    private final Object lock = new Object();
+
+    public void newTransactionID(String id) {
+        synchronized (lock) {
+        	mytransactionID = id;
+        }
+    }
+
+    public String getTransactionID() {
+        synchronized (lock) {
+            String temp = mytransactionID;
+            mytransactionID = null;
+            return temp;
+        }
+    }
+   
 	public MicroRaiden() {
         //should probably create an eth account with priv / pub keys
         //for doing the signing in the constructor
@@ -102,7 +124,7 @@ public class MicroRaiden {
         }
     }
     
-    public void loadAccountAndSignRecoverable(String accoutName, String msgHashHex){
+    public void loadAccountAndSignRecoverable(String accountName, String msgHashHex){
     	if(msgHashHex.startsWith("0x")) {
     		msgHashHex=msgHashHex.substring(2);
     	}
@@ -116,7 +138,7 @@ public class MicroRaiden {
     	ECKey keyPair = new ECKey();
     	String privateKeyHex=new String();
         try {     
-            Object obj = parser.parse(new FileReader(accoutName+".pkey"));
+            Object obj = parser.parse(new FileReader(accountName+".pkey"));
 
             JSONObject jsonObject =  (JSONObject) obj;
 
@@ -124,9 +146,9 @@ public class MicroRaiden {
             keyPair=ECKey.fromPrivate(Hex.decodeHex(privateKeyHex.toCharArray()));
             
         } catch (FileNotFoundException e) {
-        	System.out.println("Couldn't locate account file " + accoutName + ".pkey");
+        	System.out.println("Couldn't locate account file " + accountName + ".pkey");
         } catch (ParseException e) {
-        	System.out.println("Couldn't parse contents in " + accoutName + ".pkey as a JSON object.");
+        	System.out.println("Couldn't parse contents in " + accountName + ".pkey as a JSON object.");
         } catch (DecoderException e) {
         	System.out.println("Couldn't create ECKey with privateKeyHex = " + privateKeyHex);
         } catch (IOException e) {
@@ -176,8 +198,400 @@ public class MicroRaiden {
         
     }
     
-    public void createChannel() {
+    public void createChannel(String senderAccount, String receiverAccount, String deposit) {
         System.out.println("CREATE CHANNEL");
+    }
+    
+    public void getTokenBalance(String accountName){
+    	JSONParser parser = new JSONParser();
+    	JSONObject jobj=new JSONObject();
+    	ECKey keyPair = new ECKey();
+        try {     
+        	jobj = (JSONObject)parser.parse(new FileReader(accountName+".pkey"));
+            
+        } catch (FileNotFoundException e) {
+        	System.out.println("Couldn't locate account file " + accountName + ".pkey");
+        	return;
+        } catch (ParseException e) {
+        	System.out.println("Couldn't parse contents in " + accountName + ".pkey as a JSON object.");
+        	return;
+        } catch (IOException e) {
+        	System.out.println("Couldn't parse contents in " + accountName + ".pkey as a JSON object.");
+        	return;
+        }
+        String  privateKeyHex = (String) jobj.get("privkey");
+        try{
+            keyPair=ECKey.fromPrivate(Hex.decodeHex(privateKeyHex.toCharArray()));
+        }catch (DecoderException e) {
+        	System.out.println("Couldn't create ECKey with privateKeyHex = " + privateKeyHex);
+        	return;
+        } 
+        
+        String address = "0x"+new String(Hex.encodeHex(keyPair.getAddress()));
+    	CallTransaction.Contract contract = new CallTransaction.Contract(tokenAbi);
+        CallTransaction.Function balanceOf = contract.getByName("balanceOf");
+        byte [] functionBytes=balanceOf.encode(address);
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        HttpPost request = new HttpPost(rpcAddress);
+        String requestString = "{\"method\":\"eth_call\"," +
+                "\"params\":[" +
+                "{" +
+                "\"to\":\""+customTokenAddr+"\"," +
+                "\"data\":\""+"0x" + new String(org.apache.commons.codec.binary.Hex.encodeHex(functionBytes))+"\"" +
+                "}," +
+                "\"latest\"" +
+                "]," +
+                "\"id\":42,\"jsonrpc\":\"2.0\"}";
+      //System.out.println("The request string in getTokenBalance is "+requestString);
+    	String myTokenBalance="";
+    	try {
+            StringEntity params = new StringEntity(requestString);
+            request.addHeader("content-type", "application/json");
+            request.setEntity(params);
+            System.out.println("About to execute transaction via RPC: "+request.getURI().toString());
+            CloseableHttpResponse response = httpClient.execute(request);
+            System.out.println("Finished to execute transaction.");
+            myTokenBalance=new BasicResponseHandler().handleResponse(response);
+            response.close();
+            httpClient.close();
+            //System.out.println("The response from RPC is "+response+".");
+            jobj=(JSONObject)parser.parse(myTokenBalance);
+            //System.out.println("The JSON Object is "+jobj.toJSONString());
+            for (Object key1 : jobj.keySet()) {
+                if (((String)key1).equalsIgnoreCase("result")) {
+                	myTokenBalance=(String) jobj.get(key1);
+                }
+            }
+        }catch (UnsupportedEncodingException e) {
+        	System.out.println("UnsupportedEncodingException: "+e);
+        }catch (ClientProtocolException e) {
+        	System.out.println("ClientProtocolException: "+e);
+        }catch (IOException e) {
+        	System.out.println("IOException: "+e);
+        }catch(ParseException e) {
+        	System.out.println("ParseException: "+e);
+        }catch (NumberFormatException e){
+        	System.out.println("NumberFormatException="+e);
+        }
+    	System.out.println("Token balance of "+accountName+"("+address+")"+" is "+new Float(new BigInteger(myTokenBalance.substring(2),16).floatValue()/(new BigInteger(appendingZerosForETH,10).floatValue())).toString()+" TKN");
+    	
+    }
+    
+    public void buyToken(String accountName,String amountOfEther){
+    	JSONParser parser = new JSONParser();
+    	JSONObject jobj=new JSONObject();
+    	ECKey keyPair = new ECKey();
+        try {     
+        	jobj = (JSONObject)parser.parse(new FileReader(accountName+".pkey"));
+            
+        } catch (FileNotFoundException e) {
+        	System.out.println("Couldn't locate account file " + accountName + ".pkey");
+        	return;
+        } catch (ParseException e) {
+        	System.out.println("Couldn't parse contents in " + accountName + ".pkey as a JSON object.");
+        	return;
+        } catch (IOException e) {
+        	System.out.println("Couldn't parse contents in " + accountName + ".pkey as a JSON object.");
+        	return;
+        }
+        String  privateKeyHex = (String) jobj.get("privkey");
+        try{
+            keyPair=ECKey.fromPrivate(Hex.decodeHex(privateKeyHex.toCharArray()));
+        }catch (DecoderException e) {
+        	System.out.println("Couldn't create ECKey with privateKeyHex = " + privateKeyHex);
+        	return;
+        } 
+        
+        String address = "0x"+new String(Hex.encodeHex(keyPair.getAddress()));
+    	try{
+    		Double.parseDouble(amountOfEther);
+    	}catch (NumberFormatException e) {
+    		System.out.println("The numer format is wrong.");
+    		return;
+    	}
+    	
+    	if(amountOfEther.length()-amountOfEther.indexOf(".")>19) {
+    		amountOfEther=amountOfEther.substring(0,amountOfEther.indexOf(".")+19);
+    	}
+    	String localAppendingZerosForETH=appendingZerosForETH.substring(0, appendingZerosForETH.length()-amountOfEther.length()+1+amountOfEther.indexOf("."));
+    	BigInteger value=new BigInteger(amountOfEther.replace(".", "")).multiply(new BigInteger(localAppendingZerosForETH));
+    	System.out.println("User "+accountName+"("+address+") will trade "+value.toString()+" Wei to Token.");
+       	
+       	CallTransaction.Contract contract = new CallTransaction.Contract(tokenAbi);
+        CallTransaction.Function mint = contract.getByName("mint");
+        byte [] functionBytes=mint.encode();
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        HttpPost request = new HttpPost(rpcAddress);     
+        request.addHeader("content-type", "application/json");
+        
+        
+        String queryGasString = "{\"method\":\"eth_estimateGas\"," +
+                "\"params\":[" +
+                "{" +
+                "\"from\":\""+address+"\"," +
+                "\"to\":\""+customTokenAddr+"\"," +
+                "\"value\":\""+"0x"+value.toString(16)+"\","+
+                "\"data\":\""+"0x" + new String(org.apache.commons.codec.binary.Hex.encodeHex(functionBytes))+"\"" +
+                "}" +
+                "]," +
+                "\"id\":42,\"jsonrpc\":\"2.0\"}";
+        String gasEstimateResult="";
+    	try {
+    		request.setEntity(new StringEntity(queryGasString));            
+            CloseableHttpResponse response = httpClient.execute(request);            
+            String temp=new BasicResponseHandler().handleResponse(response);
+            response.close();
+            jobj=(JSONObject)parser.parse(temp);
+            for (Object key : jobj.keySet()) {
+                if (((String)key).equalsIgnoreCase("result")) {
+                	gasEstimateResult=(String) jobj.get(key);
+                }
+            }
+        }catch (UnsupportedEncodingException e) {
+        	System.out.println("UnsupportedEncodingException: " + e);
+        }catch (ClientProtocolException e) {
+        	System.out.println("ClientProtocolException: "+ e);
+        }catch (IOException e) {
+        	System.out.println("IOException: " + e);
+        }catch(ParseException e) {
+        	System.out.println("ParseException: " + e);
+        }catch (NumberFormatException e){
+        	System.out.println("NumberFormatException=" + e);
+        }
+    	if("".equals(gasEstimateResult)) {
+    		System.out.println("Invoking function with given arguments is not allowed.");
+    		return;
+    	}
+    	
+    	String queryTokenBalanceString="{\"method\":\"eth_getBalance\",\"params\":[\""+address+"\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
+    	String myEtherBalance="";
+    	try {
+            StringEntity params = new StringEntity(queryTokenBalanceString);
+            request.setEntity(params);            
+            CloseableHttpResponse response = httpClient.execute(request);            
+            String temp=new BasicResponseHandler().handleResponse(response);
+            response.close();
+            jobj=(JSONObject)parser.parse(temp);
+            for (Object key : jobj.keySet()) {
+                if (((String)key).equalsIgnoreCase("result")) {
+                	myEtherBalance=(String) jobj.get(key);
+                }
+            }
+        }catch (UnsupportedEncodingException e) {
+        	System.out.println("UnsupportedEncodingException: " + e);
+        }catch (ClientProtocolException e) {
+        	System.out.println("ClientProtocolException: " + e);
+        }catch (IOException e) {
+        	System.out.println("IOException: "+ e);
+        }catch(ParseException e) {
+        	System.out.println("ParseException: "+ e);
+        }catch (NumberFormatException e){
+        	System.out.println("NumberFormatException=" + e);
+        }
+    	if(new BigInteger(gasEstimateResult.substring(2),16).multiply(gasPrice).add(value).compareTo(new BigInteger(myEtherBalance.substring(2),16))>0) {
+    		System.out.println("Insufficient Ether to finish the transaction.");
+    		return;
+    	}
+    	String queryNonceString="{\"method\":\"parity_nextNonce\",\"params\":[\""+address+"\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
+    	String myNonceResult="";
+        try{
+            StringEntity params = new StringEntity(queryNonceString);
+            request.setEntity(params);            
+            CloseableHttpResponse response = httpClient.execute(request);            
+            String temp=new BasicResponseHandler().handleResponse(response);
+            response.close();           
+            jobj=(JSONObject)parser.parse(temp);
+            for (Object key : jobj.keySet()) {
+                if (((String)key).equalsIgnoreCase("result")) {
+                	myNonceResult=(String) jobj.get(key);
+                }
+            }
+        }catch (UnsupportedEncodingException e) {
+        	System.out.println("UnsupportedEncodingException: "+e);
+        }catch (ClientProtocolException e) {
+        	System.out.println("ClientProtocolException: "+e);
+        }catch (IOException e) {
+        	System.out.println("IOException: "+e);
+        }catch(ParseException e) {
+        	System.out.println("ParseException: "+e);
+        }catch (NumberFormatException e){
+        	System.out.println("NumberFormatException="+e);
+        }
+        Transaction t = new Transaction(bigIntegerToBytes(new BigInteger(myNonceResult.substring(2),16)), // nonce
+                bigIntegerToBytes(gasPrice), // gas price
+                bigIntegerToBytes(new BigInteger(gasEstimateResult.substring(2),16)), // gas limit
+                ByteUtil.hexStringToBytes(customTokenAddr), // to id
+                bigIntegerToBytes(value), // value
+                functionBytes, 42);// chainid
+        t.sign(keyPair);
+        String signedTrans = "0x" + new String(org.apache.commons.codec.binary.Hex.encodeHex(t.getEncoded()));
+        String mintSendRawTransactionString = "{\"method\":\"eth_sendRawTransaction\",\"params\":[\""
+                + signedTrans + "\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
+        String myTransactionID="";
+        try {
+            StringEntity params = new StringEntity(mintSendRawTransactionString);
+            request.setEntity(params);
+            CloseableHttpResponse response = httpClient.execute(request);
+            String temp = new BasicResponseHandler().handleResponse(response);
+            response.close();
+            httpClient.close();
+            jobj=(JSONObject)parser.parse(temp);
+            for (Object key : jobj.keySet()) {
+                if (((String)key).equalsIgnoreCase("result")) {
+                	myTransactionID=(String) jobj.get(key);
+                }
+            }
+        } catch (UnsupportedEncodingException e) {
+        	System.out.println("UnsupportedEncodingException: "+e);
+        }catch (ClientProtocolException e) {
+        	System.out.println("ClientProtocolException: "+e);
+        }catch (IOException e) {
+        	System.out.println("IOException: "+e);
+        }catch(ParseException e) {
+        	System.out.println("ParseException: "+e);
+        }catch (NumberFormatException e){
+        	System.out.println("NumberFormatException="+e);
+        }
+        if(!"".equals(myTransactionID)) {
+        	System.out.println("Transaction broadcast to Kovan with ID = "+myTransactionID);
+        	newTransactionID(myTransactionID);
+        	new Thread() {
+        		private String pendingTransactionID=getTransactionID();
+        		private boolean loop=true;
+        		public void run(){
+                    while(loop){
+                    	Object tempObj=null;
+                    	try {
+	                        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+	                        HttpPost request = new HttpPost(rpcAddress);     
+	                        request.addHeader("content-type", "application/json");
+	                        String queryTransactionString = "{\"method\":\"eth_getTransactionReceipt\"," +
+	                                "\"params\":[\"" +
+	                                pendingTransactionID +
+	                                "\"]," +
+	                                "\"id\":42,\"jsonrpc\":\"2.0\"}";
+	                        StringEntity params = new StringEntity(queryTransactionString);
+	                        request.setEntity(params);
+	                        CloseableHttpResponse response = httpClient.execute(request);
+	                        String temp =new BasicResponseHandler().handleResponse(response);
+	                        response.close();
+	                        httpClient.close();
+	                      
+	                        JSONParser parser = new JSONParser();
+	                        JSONObject jobj=(JSONObject)parser.parse(temp);
+                            for (Object key : jobj.keySet()) {
+                                if (((String)key).equalsIgnoreCase("result")) {
+                                	tempObj=jobj.get(key);
+                                }
+                            }
+                        }catch (UnsupportedEncodingException e) {
+                        	System.out.println("UnsupportedEncodingException: "+e);
+                        }catch (ClientProtocolException e) {
+                        	System.out.println("ClientProtocolException: "+e);
+                        }catch (IOException e) {
+                        	System.out.println("IOException: "+e);
+                        }catch(ParseException e) {
+                        	System.out.println("ParseException: "+e);
+                        }catch (NumberFormatException e){
+                        	System.out.println("NumberFormatException="+e);
+                        }
+                        if(tempObj==null){
+                            //do nothing
+                        }else{
+                        	loop=false;
+                            JSONObject jsonObject=(JSONObject) tempObj;
+                            //jsonObject can be further parsed to get more information.
+                            System.out.println("Transaction "+pendingTransactionID+" has been successfully mint.");
+                        }
+                        try {
+                        	Thread.sleep(INTERVAL_CHECK_TRANS_DONE);
+                        }catch (InterruptedException e) {
+                        	
+                        }
+                    }
+                }
+        	}.start();
+        }
+
+    	
+    }
+    
+    private static byte[] bigIntegerToBytes(BigInteger value) {
+        if (value == null)
+            return null;
+
+        byte[] data = value.toByteArray();
+
+        if (data.length != 1 && data[0] == 0) {
+            byte[] tmp = new byte[data.length - 1];
+            System.arraycopy(data, 1, tmp, 0, tmp.length);
+            data = tmp;
+        }
+        return data;
+    }
+    
+    public void getEtherBalance(String accountName){
+    	JSONParser parser = new JSONParser();
+    	JSONObject jobj=new JSONObject();
+    	ECKey keyPair = new ECKey();
+        try {     
+        	jobj = (JSONObject)parser.parse(new FileReader(accountName+".pkey"));
+            
+        } catch (FileNotFoundException e) {
+        	System.out.println("Couldn't locate account file " + accountName + ".pkey");
+        	return;
+        } catch (ParseException e) {
+        	System.out.println("Couldn't parse contents in " + accountName + ".pkey as a JSON object.");
+        	return;
+        } catch (IOException e) {
+        	System.out.println("Couldn't parse contents in " + accountName + ".pkey as a JSON object.");
+        	return;
+        }
+        String  privateKeyHex = (String) jobj.get("privkey");
+        try{
+            keyPair=ECKey.fromPrivate(Hex.decodeHex(privateKeyHex.toCharArray()));
+        }catch (DecoderException e) {
+        	System.out.println("Couldn't create ECKey with privateKeyHex = " + privateKeyHex);
+        	return;
+        } 
+        
+        String address = "0x"+new String(Hex.encodeHex(keyPair.getAddress()));
+    	CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        HttpPost request = new HttpPost(rpcAddress);
+        String requestString="{\"method\":\"eth_getBalance\",\"params\":[\""+address+"\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
+        //System.out.println("The request string in getEtherBalance is "+requestString);
+    	String myEtherBalance="";
+    	try {
+            StringEntity params = new StringEntity(requestString);
+            request.addHeader("content-type", "application/json");
+            request.setEntity(params);
+            System.out.println("About to execute transaction via RPC: "+request.getURI().toString());
+            CloseableHttpResponse response = httpClient.execute(request);
+            System.out.println("Finished to execute transaction.");
+            myEtherBalance=new BasicResponseHandler().handleResponse(response);
+            response.close();
+            httpClient.close();
+            //System.out.println("The response from RPC is "+response+".");
+            jobj=(JSONObject)parser.parse(myEtherBalance);
+
+            for (Object key1 : jobj.keySet()) {
+                if (((String)key1).equalsIgnoreCase("result")) {
+                	myEtherBalance=(String) jobj.get(key1);
+                }
+            }
+        }catch (UnsupportedEncodingException e) {
+        	System.out.println("UnsupportedEncodingException: " + e);
+        }catch (ClientProtocolException e) {
+        	System.out.println("ClientProtocolException: " + e);
+        }catch (IOException e) {
+        	System.out.println("IOException: "+ e);
+        }catch(ParseException e) {
+        	System.out.println("ParseException: "+ e);
+        }catch (NumberFormatException e){
+        	System.out.println("NumberFormatException=" + e);
+        }
+    	System.out.println("Ether Balance of "+accountName+"("+address+")"+" is "+new Float(new BigInteger(myEtherBalance.substring(2),16).floatValue()/(new BigInteger(appendingZerosForETH,10).floatValue())).toString()+" Ether");
+    	
     }
     
     public void updateBalance() {
@@ -214,35 +628,55 @@ public class MicroRaiden {
         }
     }
     
-    public static void getNonce(String account) {
-    	String myresult="";
+    public void getNonce(String accountName) {
+    	JSONParser parser = new JSONParser();
+    	JSONObject jobj=new JSONObject();
+    	ECKey keyPair = new ECKey();
+        try {     
+        	jobj = (JSONObject)parser.parse(new FileReader(accountName+".pkey"));
+            
+        } catch (FileNotFoundException e) {
+        	System.out.println("Couldn't locate account file " + accountName + ".pkey");
+        	return;
+        } catch (ParseException e) {
+        	System.out.println("Couldn't parse contents in " + accountName + ".pkey as a JSON object.");
+        	return;
+        } catch (IOException e) {
+        	System.out.println("Couldn't parse contents in " + accountName + ".pkey as a JSON object.");
+        	return;
+        }
+        String  privateKeyHex = (String) jobj.get("privkey");
         try{
-            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-            HttpPost request = new HttpPost(rpcAddress);
-            String requestString="{\"method\":\"parity_nextNonce\",\"params\":[\""+account+"\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
-
-            System.out.println("callSysFunction()"+requestString);
+            keyPair=ECKey.fromPrivate(Hex.decodeHex(privateKeyHex.toCharArray()));
+        }catch (DecoderException e) {
+        	System.out.println("Couldn't create ECKey with privateKeyHex = " + privateKeyHex);
+        	return;
+        } 
+        
+        String address = "0x"+new String(Hex.encodeHex(keyPair.getAddress()));
+    	CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        HttpPost request = new HttpPost(rpcAddress);
+        String requestString="{\"method\":\"parity_nextNonce\",\"params\":[\""+address+"\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
+        //System.out.println("The request string in getNonce is "+requestString);
+        request.addHeader("content-type", "application/json");
+    	String myNonceResult="";
+        try{
             StringEntity params = new StringEntity(requestString);
-            System.out.println("REQUEST"+ requestString);
-            request.addHeader("content-type", "application/json");
             request.setEntity(params);
-            System.out.println("About to execute transaction:"+request.getURI().toString());
+            System.out.println("About to execute transaction via RPC: "+request.getURI().toString());
             CloseableHttpResponse response = httpClient.execute(request);
             System.out.println("Finished to execute transaction.");
-            String results_=new BasicResponseHandler().handleResponse(response);
+            myNonceResult=new BasicResponseHandler().handleResponse(response);
             response.close();
-            System.out.println("response from RPC is "+response+".");
-            JSONParser parser = new JSONParser();
-            JSONObject jobj=(JSONObject)parser.parse(results_);
+            httpClient.close();
+            //System.out.println("The response from RPC is "+response+".");
+            jobj=(JSONObject)parser.parse(myNonceResult);
 
-            for (Object key1 : jobj.keySet()) {
-            	System.out.println("key1="+key1);
-                if (((String)key1).equalsIgnoreCase("result")) {
-                    myresult=(String) jobj.get(key1);
+            for (Object key : jobj.keySet()) {
+                if (((String)key).equalsIgnoreCase("result")) {
+                	myNonceResult=(String) jobj.get(key);
                 }
             }
-            BigInteger nonceValue=new BigInteger(myresult.substring(2),16);
-            System.out.println("Nonce="+nonceValue.toString(10));
         }catch (UnsupportedEncodingException e) {
         	System.out.println("UnsupportedEncodingException: "+e);
         }catch (ClientProtocolException e) {
@@ -254,11 +688,32 @@ public class MicroRaiden {
         }catch (NumberFormatException e){
         	System.out.println("NumberFormatException="+e);
         }
-    	
+        System.out.println("Nonce="+new BigInteger(myNonceResult.substring(2),16).toString(10));
     }
     
     public static void main(String[] args) throws Exception {
+    	
         MicroRaiden mr = new MicroRaiden();
+        JSONParser parser = new JSONParser();
+        
+        try {     
+            Object obj = parser.parse(new FileReader("rm-ethereum.conf"));
+
+            JSONObject jsonObject =  (JSONObject) obj;
+            for (Object key : jsonObject.keySet()) {
+                if (((String)key).equalsIgnoreCase("gasPrice")) {
+                    gasPrice=new BigInteger((String) jsonObject.get(key),10);
+                    System.out.println("The global gas price is set to be "+gasPrice.toString(10));
+                }
+            }
+            
+        } catch (FileNotFoundException e) {
+        	
+        } catch (ParseException e) {
+        	System.out.println("Couldn't parse contents in m-ethereum.conf as a JSON object.");
+        } catch (IOException e) {
+        	System.out.println("Couldn't parse contents in m-ethereum.conf as a JSON object.");
+        }
         
         if(args.length < 1) {
             System.out.println("Usage: microraiden-java <function> <args>");
