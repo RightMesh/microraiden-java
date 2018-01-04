@@ -43,6 +43,9 @@ dependencies {
     // https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple
 	compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
 	
+	// https://mvnrepository.com/artifact/org.kocakosm/pitaya
+	compile group: 'org.kocakosm', name: 'pitaya', version: '0.4'
+	
 }
 
 // Define the main class for the application
