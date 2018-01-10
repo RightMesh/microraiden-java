@@ -209,7 +209,7 @@ public class MicroRaiden {
     		System.out.println("The provided channel's address is not valid.");
     		return null;
     	}
-		if(channelAddressBytes.length!=20) {
+		if(channelAddressBytes.length!=LENGTH_OF_ID_IN_BYTES) {
 			System.out.println("The provided channel's address is not valid.");
 			return null;
 		}
@@ -267,7 +267,7 @@ public class MicroRaiden {
     		System.out.println("The provided receiver's address is not valid.");
     		return null;
     	}
-		if(receiverAddressBytes.length!=20) {
+		if(receiverAddressBytes.length!=LENGTH_OF_ID_IN_BYTES) {
 			System.out.println("The provided receiver's address is not valid.");
 			return null;
 		}
@@ -277,7 +277,7 @@ public class MicroRaiden {
     		System.out.println("The provided channel's address is not valid.");
     		return null;
     	}
-		if(channelAddressBytes.length!=20) {
+		if(channelAddressBytes.length!=LENGTH_OF_ID_IN_BYTES) {
 			System.out.println("The provided channel's address is not valid.");
 			return null;
 		}
