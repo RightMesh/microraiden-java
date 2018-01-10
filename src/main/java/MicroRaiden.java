@@ -49,6 +49,8 @@ public class MicroRaiden {
     private static BigInteger gasPrice=null;
     private static boolean debugInfo=false;
     private static final int INTERVAL_CHECK_TRANS_DONE=100;
+    
+    private static Http httpAgent=null;
 
     /*
     private boolean running=false;
@@ -464,7 +466,7 @@ public class MicroRaiden {
         }
         String cooperativeCloseGasEstimate="";
     	try {
-    		cooperativeCloseGasEstimate=getHttpResponse(querycooperativeCloseGasString);
+    		cooperativeCloseGasEstimate=httpAgent.getHttpResponse(querycooperativeCloseGasString);
         }catch (IOException e) {
         	System.out.println("Invoking function with given arguments is not allowed.");
     		return;
@@ -476,7 +478,7 @@ public class MicroRaiden {
     	String queryNonceString="{\"method\":\"parity_nextNonce\",\"params\":[\""+address+"\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
     	String myNonceResult="";
     	try {
-    		myNonceResult=getHttpResponse(queryNonceString);
+    		myNonceResult=httpAgent.getHttpResponse(queryNonceString);
         }catch (IOException e) {
         	System.out.println("Nonce with account "+delegatorName+" cannot be found.");
     		return;		
@@ -498,7 +500,7 @@ public class MicroRaiden {
         
     	String myTransactionID="";
     	try {
-    		myTransactionID=getHttpResponse(cooperativeCloseSendRawTransactionString);
+    		myTransactionID=httpAgent.getHttpResponse(cooperativeCloseSendRawTransactionString);
         }catch (IOException e) {
         	System.out.println("Fail to execute HTTP request.");
     		return;
@@ -547,7 +549,7 @@ public class MicroRaiden {
         }
         String myTokenBalance="";
         try {
-        	myTokenBalance=getHttpResponse(requestString);
+        	myTokenBalance=httpAgent.getHttpResponse(requestString);
         }catch (IOException e) {
         	System.out.println("Cannot get token balance for "+accountName);
     		return;
@@ -649,7 +651,7 @@ public class MicroRaiden {
         }
         String approveGasEstimate="";
     	try {
-    		approveGasEstimate=getHttpResponse(queryApproveGasString);
+    		approveGasEstimate=httpAgent.getHttpResponse(queryApproveGasString);
         }catch (IOException e) {
         	System.out.println("Invoking function with given arguments is not allowed.");
     		return;
@@ -661,7 +663,7 @@ public class MicroRaiden {
     	String queryNonceString="{\"method\":\"parity_nextNonce\",\"params\":[\""+address+"\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
     	String myNonceResult1="";
     	try {
-    		myNonceResult1=getHttpResponse(queryNonceString);
+    		myNonceResult1=httpAgent.getHttpResponse(queryNonceString);
         }catch (IOException e) {
         	System.out.println("Nonce with account "+senderAccountName+" cannot be found.");
     		return;		
@@ -683,7 +685,7 @@ public class MicroRaiden {
         
     	String myTransactionID1="";
     	try {
-    		myTransactionID1=getHttpResponse(approveSendRawTransactionString);
+    		myTransactionID1=httpAgent.getHttpResponse(approveSendRawTransactionString);
         }catch (IOException e) {
         	System.out.println("Fail to execute HTTP request.");
     		return;
@@ -698,7 +700,7 @@ public class MicroRaiden {
         }
         String myNonceResult2="";
         try {
-    		myNonceResult2=getHttpResponse(queryNonceString);
+    		myNonceResult2=httpAgent.getHttpResponse(queryNonceString);
         }catch (IOException e) {
         	System.out.println("Nonce with account "+senderAccountName+" cannot be found.");
     		return;
@@ -724,7 +726,7 @@ public class MicroRaiden {
         }
         String creatChannelGasEstimate="";
     	try {
-    		creatChannelGasEstimate=getHttpResponse(queryCreatChannelGasString);
+    		creatChannelGasEstimate=httpAgent.getHttpResponse(queryCreatChannelGasString);
         }catch (IOException e) {
         	System.out.println("Invoking function with given arguments is not allowed.");
     		return;
@@ -746,7 +748,7 @@ public class MicroRaiden {
         
     	String myTransactionID2="";
     	try {
-    		myTransactionID2=getHttpResponse(createChannelSendRawTransactionString);
+    		myTransactionID2=httpAgent.getHttpResponse(createChannelSendRawTransactionString);
         }catch (IOException e) {
         	System.out.println("Fail to execute HTTP request.");
     		return;
@@ -780,52 +782,6 @@ public class MicroRaiden {
     	return;
 
     }
-    
-    private String getHttpResponse(String requestString) throws IOException{
-    	JSONParser parser = new JSONParser();
-    	JSONObject jobj=new JSONObject();
-        String executionResult="";
-        String temp="";
-    	try {
-    		CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-    		
-    		HttpPost request = new HttpPost(rpcAddress);     
-            request.addHeader("content-type", "application/json");
-    		request.setEntity(new StringEntity(requestString));  
-    		
-            CloseableHttpResponse response = httpClient.execute(request);            
-            response.close();
-            httpClient.close();
-            
-            temp=new BasicResponseHandler().handleResponse(response);
-            jobj=(JSONObject)parser.parse(temp);
-            if(debugInfo) {
-            	System.out.println("result = "+jobj.toJSONString());
-            }
-            for (Object key : jobj.keySet()) {
-                if (((String)key).equalsIgnoreCase("result")) {
-                	executionResult=(String) jobj.get(key);
-                    if(debugInfo) {
-                    	System.out.println("result = "+executionResult);
-                    }
-                }
-            }
-        }catch (UnsupportedEncodingException e) {
-        	System.out.println("UnsupportedEncodingException: " + e);
-        }catch (ClientProtocolException e) {
-        	System.out.println("ClientProtocolException: "+ e);
-        }catch (IOException e) {
-        	System.out.println("IOException: " + e);
-        }catch(ParseException e) {
-        	System.out.println("ParseException: " + e);
-        }catch (NumberFormatException e){
-        	System.out.println("NumberFormatException=" + e);
-        }
-    	if("".equals(executionResult)) {
-    		throw new IOException(temp);
-    	}
-    	return executionResult;
-    } 
     
     public void buyToken(String accountName,String amountOfEther){
     	ECKey keyPair=getECKeyByName(accountName);
@@ -870,7 +826,7 @@ public class MicroRaiden {
                 "\"id\":42,\"jsonrpc\":\"2.0\"}";
         String gasEstimateResult="";
     	try {
-    		gasEstimateResult=getHttpResponse(queryGasString);
+    		gasEstimateResult=httpAgent.getHttpResponse(queryGasString);
         }catch (IOException e) {
         	System.out.println("Invoking function with given arguments is not allowed.");
     		return;
@@ -882,7 +838,7 @@ public class MicroRaiden {
     	String queryTokenBalanceString="{\"method\":\"eth_getBalance\",\"params\":[\""+address+"\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
         String myEtherBalance="";
     	try {
-    		myEtherBalance=getHttpResponse(queryTokenBalanceString);
+    		myEtherBalance=httpAgent.getHttpResponse(queryTokenBalanceString);
         }catch (IOException e) {
         	System.out.println("Invoking function with given arguments is not allowed.");
     		return;
@@ -898,7 +854,7 @@ public class MicroRaiden {
     	String queryNonceString="{\"method\":\"parity_nextNonce\",\"params\":[\""+address+"\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
     	String myNonceResult="";
     	try {
-    		myNonceResult=getHttpResponse(queryNonceString);
+    		myNonceResult=httpAgent.getHttpResponse(queryNonceString);
         }catch (IOException e) {
         	System.out.println("Nonce with account "+accountName+" cannot be found.");
     		return;
@@ -920,7 +876,7 @@ public class MicroRaiden {
         
     	String myTransactionID="";
     	try {
-    		myTransactionID=getHttpResponse(mintSendRawTransactionString);
+    		myTransactionID=httpAgent.getHttpResponse(mintSendRawTransactionString);
         }catch (IOException e) {
         	System.out.println("Fail to execute HTTP request.");
     		return;
@@ -1032,7 +988,7 @@ public class MicroRaiden {
         //System.out.println("The request string in getEtherBalance is "+requestString);
         String myEtherBalance="";
     	try {
-    		myEtherBalance=getHttpResponse(requestString);
+    		myEtherBalance=httpAgent.getHttpResponse(requestString);
         }catch (IOException e) {
         	System.out.println("Invoking function with given arguments is not allowed.");
     		return;
@@ -1075,70 +1031,6 @@ public class MicroRaiden {
             
             System.out.println("  " + m.getReturnType() + " " + m.getName() + "(" + params + ")");
         }
-    }
-
-    
-    private void getNonce(String accountName) {
-    	JSONParser parser = new JSONParser();
-    	JSONObject jobj=new JSONObject();
-    	ECKey keyPair = new ECKey();
-        try {     
-        	jobj = (JSONObject)parser.parse(new FileReader(accountName+".pkey"));
-            
-        } catch (FileNotFoundException e) {
-        	System.out.println("Couldn't locate account file " + accountName + ".pkey");
-        	return;
-        } catch (ParseException e) {
-        	System.out.println("Couldn't parse contents in " + accountName + ".pkey as a JSON object.");
-        	return;
-        } catch (IOException e) {
-        	System.out.println("Couldn't parse contents in " + accountName + ".pkey as a JSON object.");
-        	return;
-        }
-        String  privateKeyHex = (String) jobj.get("privkey");
-        try{
-            keyPair=ECKey.fromPrivate(Hex.decodeHex(privateKeyHex.toCharArray()));
-        }catch (DecoderException e) {
-        	System.out.println("Couldn't create ECKey with privateKeyHex = " + privateKeyHex);
-        	return;
-        } 
-        
-        String address = "0x"+new String(Hex.encodeHex(keyPair.getAddress()));
-    	CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-        HttpPost request = new HttpPost(rpcAddress);
-        String requestString="{\"method\":\"parity_nextNonce\",\"params\":[\""+address+"\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
-        //System.out.println("The request string in getNonce is "+requestString);
-        request.addHeader("content-type", "application/json");
-    	String myNonceResult="";
-        try{
-            StringEntity params = new StringEntity(requestString);
-            request.setEntity(params);
-            System.out.println("About to execute transaction via RPC: "+request.getURI().toString());
-            CloseableHttpResponse response = httpClient.execute(request);
-            System.out.println("Finished to execute transaction.");
-            myNonceResult=new BasicResponseHandler().handleResponse(response);
-            response.close();
-            httpClient.close();
-            //System.out.println("The response from RPC is "+response+".");
-            jobj=(JSONObject)parser.parse(myNonceResult);
-
-            for (Object key : jobj.keySet()) {
-                if (((String)key).equalsIgnoreCase("result")) {
-                	myNonceResult=(String) jobj.get(key);
-                }
-            }
-        }catch (UnsupportedEncodingException e) {
-        	System.out.println("UnsupportedEncodingException: "+e);
-        }catch (ClientProtocolException e) {
-        	System.out.println("ClientProtocolException: "+e);
-        }catch (IOException e) {
-        	System.out.println("IOException: "+e);
-        }catch(ParseException e) {
-        	System.out.println("ParseException: "+e);
-        }catch (NumberFormatException e){
-        	System.out.println("NumberFormatException="+e);
-        }
-        System.out.println("Nonce="+new BigInteger(myNonceResult.substring(2),16).toString(10));
     }
     
     public static void main(String[] args) throws Exception {
@@ -1217,15 +1109,7 @@ public class MicroRaiden {
             		default:
             			System.out.println("Unknown key is detected when parsing the configuration files.");
             	}
-                if (((String)key).equalsIgnoreCase("debugInfo")) {
-                	debugInfo=((String) jsonObject.get(key)).equals("true")?true:false;
-                }
-            	if (((String)key).equalsIgnoreCase("gasPrice")) {
-                    gasPrice=new BigInteger((String) jsonObject.get(key),10);
-                    if(debugInfo) {
-                    	System.out.println("The global gas price is set to be "+gasPrice.toString(10));
-                    }
-                }
+            	httpAgent=new Http(rpcAddress,debugInfo);
                 
             }
             
