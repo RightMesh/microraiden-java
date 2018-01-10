@@ -1,8 +1,6 @@
 import java.lang.reflect.*;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -37,15 +35,18 @@ import org.kocakosm.pitaya.security.Digests;
  * CLI for the MicroRaiden client
  */
 public class MicroRaiden {
-	private static final String rpcAddress="http://localhost:8545";
-	private static final String channelAddr="0x5832edf9Da129Aa13fdA0fBff93379d3ED8a4a93";
-	private static final String tokenAddr="0x0fC373426c87F555715E6fE673B07Fe9E7f0E6e7";
-	private static final CallTransaction.Contract channelContract = new CallTransaction.Contract("[{\"constant\":true,\"inputs\":[],\"name\":\"challenge_period\",\"outputs\":[{\"name\":\"\",\"type\":\"uint32\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_sender_address\",\"type\":\"address\"},{\"name\":\"_receiver_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"}],\"name\":\"getChannelInfo\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"},{\"name\":\"\",\"type\":\"uint192\"},{\"name\":\"\",\"type\":\"uint32\"},{\"name\":\"\",\"type\":\"uint192\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_receiver_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"name\":\"_balance\",\"type\":\"uint192\"}],\"name\":\"uncooperativeClose\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"version\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_receiver_address\",\"type\":\"address\"},{\"name\":\"_deposit\",\"type\":\"uint192\"}],\"name\":\"createChannelERC20\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_receiver_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"}],\"name\":\"settle\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_sender_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"name\":\"_balance\",\"type\":\"uint192\"}],\"name\":\"getClosingHash\",\"outputs\":[{\"name\":\"message_hash\",\"type\":\"bytes32\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"channel_deposit_bugbounty_limit\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_receiver_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"name\":\"_balance\",\"type\":\"uint192\"},{\"name\":\"_balance_msg_sig_r\",\"type\":\"bytes32\"},{\"name\":\"_balance_msg_sig_s\",\"type\":\"bytes32\"},{\"name\":\"_balance_msg_sig_v\",\"type\":\"uint8\"}],\"name\":\"extractBalanceProofSignature\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"closing_requests\",\"outputs\":[{\"name\":\"closing_balance\",\"type\":\"uint192\"},{\"name\":\"settle_block_number\",\"type\":\"uint32\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"channels\",\"outputs\":[{\"name\":\"deposit\",\"type\":\"uint192\"},{\"name\":\"open_block_number\",\"type\":\"uint32\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_sender_address\",\"type\":\"address\"},{\"name\":\"_receiver_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"}],\"name\":\"getKey\",\"outputs\":[{\"name\":\"data\",\"type\":\"bytes32\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_sender_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"name\":\"_balance\",\"type\":\"uint192\"},{\"name\":\"_closing_sig_r\",\"type\":\"bytes32\"},{\"name\":\"_closing_sig_s\",\"type\":\"bytes32\"},{\"name\":\"_closing_sig_v\",\"type\":\"uint8\"}],\"name\":\"extractClosingSignature\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_sender_address\",\"type\":\"address\"},{\"name\":\"_deposit\",\"type\":\"uint256\"},{\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"tokenFallback\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_receiver_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"name\":\"_added_deposit\",\"type\":\"uint192\"}],\"name\":\"topUpERC20\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_receiver_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"name\":\"_balance\",\"type\":\"uint192\"}],\"name\":\"getBalanceHash\",\"outputs\":[{\"name\":\"message_hash\",\"type\":\"bytes32\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_receiver_address\",\"type\":\"address\"},{\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"name\":\"_balance\",\"type\":\"uint192\"},{\"name\":\"_balance_msg_sig_r\",\"type\":\"bytes32\"},{\"name\":\"_balance_msg_sig_s\",\"type\":\"bytes32\"},{\"name\":\"_balance_msg_sig_v\",\"type\":\"uint8\"},{\"name\":\"_closing_sig_r\",\"type\":\"bytes32\"},{\"name\":\"_closing_sig_s\",\"type\":\"bytes32\"},{\"name\":\"_closing_sig_v\",\"type\":\"uint8\"}],\"name\":\"cooperativeClose\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"token\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"type\":\"function\"},{\"inputs\":[{\"name\":\"_token_address\",\"type\":\"address\"},{\"name\":\"_challenge_period\",\"type\":\"uint32\"}],\"payable\":false,\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_sender\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_receiver\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"_deposit\",\"type\":\"uint192\"}],\"name\":\"ChannelCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_sender\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_receiver\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"indexed\":false,\"name\":\"_added_deposit\",\"type\":\"uint192\"}],\"name\":\"ChannelToppedUp\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_sender\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_receiver\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"indexed\":false,\"name\":\"_balance\",\"type\":\"uint192\"}],\"name\":\"ChannelCloseRequested\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_sender\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_receiver\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_open_block_number\",\"type\":\"uint32\"},{\"indexed\":false,\"name\":\"_balance\",\"type\":\"uint192\"}],\"name\":\"ChannelSettled\",\"type\":\"event\"}]");
-	private static final CallTransaction.Contract tokenContract = new CallTransaction.Contract("[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_spender\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"mint\",\"outputs\":[],\"payable\":true,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"multiplier\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_from\",\"type\":\"address\"},{\"name\":\"_to\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"name\":\"\",\"type\":\"uint8\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"transferFunds\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"version\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner_address\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"},{\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"transfer\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"},{\"name\":\"_spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"inputs\":[{\"name\":\"initial_supply\",\"type\":\"uint256\"},{\"name\":\"token_name\",\"type\":\"string\"},{\"name\":\"token_symbol\",\"type\":\"string\"},{\"name\":\"decimal_units\",\"type\":\"uint8\"}],\"payable\":false,\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_to\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_num\",\"type\":\"uint256\"}],\"name\":\"Minted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_owner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_spender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"}]");
-	private static final String appendingZerosForETH="1000000000000000000";
-    private static final String appendingZerosForTKN="1000000000000000000";
-    private static final BigInteger MAX_196_BIT=new BigInteger("2",10).pow(196).subtract(new BigInteger("1",10));
-    private static BigInteger gasPrice=new BigInteger("5000000000");
+	private static String rpcAddress=null;
+	private static String channelAddr=null;
+	private static String tokenAddr=null;
+	private static String channelABI=null;
+	private static String tokenABI=null;
+	
+	private static CallTransaction.Contract channelContract = null;
+	private static CallTransaction.Contract tokenContract = null;
+	private static String appendingZerosForETH=null;
+    private static String appendingZerosForTKN=null;
+    private static BigInteger MAX_DEPOSIT=null;
+    private static BigInteger gasPrice=null;
     private static boolean debugInfo=false;
     private static final int INTERVAL_CHECK_TRANS_DONE=100;
 
@@ -209,15 +210,6 @@ public class MicroRaiden {
         keccak256.update(messageToBeHashed);
         return keccak256.digest();
     }
-    
-    private static String prependingZeros(String hexString, int totalWidth) {
-    	String result="";
-    	while(result.length()+hexString.length()<totalWidth) {
-    		result=result+"0";
-    	}
-    	return result+hexString;
-    		
-    }
 
     private static byte[] getBalanceMsgHash(String receiverAddress,String open_block_number,String balance, String channelAddress) {
     	byte[] receiverAddressBytes=new byte[0];
@@ -265,15 +257,15 @@ public class MicroRaiden {
 	    	if(balance.length()-balance.indexOf(".")>19) {
 	    		balance=balance.substring(0,balance.indexOf(".")+19);
 	    	}
-	    	String localAppendingZerosForETH=appendingZerosForTKN.substring(0, appendingZerosForTKN.length()-balance.length()+1+balance.indexOf("."));
-	    	tempBalance=new BigInteger(balance.replace(".", "")).multiply(new BigInteger(localAppendingZerosForETH));
+	    	String localAppendingZerosForTKN=appendingZerosForTKN.substring(0, appendingZerosForTKN.length()-balance.length()+1+balance.indexOf("."));
+	    	tempBalance=new BigInteger(balance.replace(".", "")).multiply(new BigInteger(localAppendingZerosForTKN));
     	}else {
     		tempBalance=new BigInteger(balance,10).multiply(new BigInteger(appendingZerosForTKN));
     	}
     	
     	try{
-    		openBlockNumberBytes=Hex.decodeHex(prependingZeros(Integer.toHexString(Integer.parseInt(open_block_number)),8).toCharArray());
-    		balanceInChannelBytes=Hex.decodeHex(prependingZeros(tempBalance.toString(16),48).toCharArray());
+    		openBlockNumberBytes=Hex.decodeHex(Utility.prependingZeros(Integer.toHexString(Integer.parseInt(open_block_number)),8).toCharArray());
+    		balanceInChannelBytes=Hex.decodeHex(Utility.prependingZeros(tempBalance.toString(16),48).toCharArray());
     	}catch(DecoderException e) {
 
     	}
@@ -333,15 +325,15 @@ public class MicroRaiden {
 	    	if(balance.length()-balance.indexOf(".")>19) {
 	    		balance=balance.substring(0,balance.indexOf(".")+19);
 	    	}
-	    	String localAppendingZerosForETH=appendingZerosForTKN.substring(0, appendingZerosForTKN.length()-balance.length()+1+balance.indexOf("."));
-	    	tempBalance=new BigInteger(balance.replace(".", "")).multiply(new BigInteger(localAppendingZerosForETH));
+	    	String localAppendingZerosForTKN=appendingZerosForTKN.substring(0, appendingZerosForTKN.length()-balance.length()+1+balance.indexOf("."));
+	    	tempBalance=new BigInteger(balance.replace(".", "")).multiply(new BigInteger(localAppendingZerosForTKN));
     	}else {
     		tempBalance=new BigInteger(balance,10).multiply(new BigInteger(appendingZerosForTKN));
     	}
     	
     	try{
-    		openBlockNumberBytes=Hex.decodeHex(prependingZeros(Integer.toHexString(Integer.parseInt(open_block_number)),8).toCharArray());
-    		balanceInChannelBytes=Hex.decodeHex(prependingZeros(tempBalance.toString(16),48).toCharArray());
+    		openBlockNumberBytes=Hex.decodeHex(Utility.prependingZeros(Integer.toHexString(Integer.parseInt(open_block_number)),8).toCharArray());
+    		balanceInChannelBytes=Hex.decodeHex(Utility.prependingZeros(tempBalance.toString(16),48).toCharArray());
     	}catch(DecoderException e) {
 
     	}
@@ -410,7 +402,7 @@ public class MicroRaiden {
         return senderKeyPair.sign(balanceMsgHashHex).toByteArray();
     	
     }
-    
+	
     public void closeChannelCooperatively(String delegatorName, String senderName, String receiverName, String openBlockNum, String balance) {
     	byte[] closing_Msg_Hash_Sig=getClosingMsgHashSig(senderName,channelAddr,openBlockNum,balance,receiverName);
     	byte[] balance_Msg_Hash_Sig=getBalanceMsgHashSig(receiverName,channelAddr,openBlockNum,balance,senderName);
@@ -448,8 +440,8 @@ public class MicroRaiden {
 	    	if(balance.length()-balance.indexOf(".")>19) {
 	    		balance=balance.substring(0,balance.indexOf(".")+19);
 	    	}
-	    	String localAppendingZerosForETH=appendingZerosForTKN.substring(0, appendingZerosForTKN.length()-balance.length()+1+balance.indexOf("."));
-	    	tempBalance=new BigInteger(balance.replace(".", "")).multiply(new BigInteger(localAppendingZerosForETH));
+	    	String localAppendingZerosForTKN=appendingZerosForTKN.substring(0, appendingZerosForTKN.length()-balance.length()+1+balance.indexOf("."));
+	    	tempBalance=new BigInteger(balance.replace(".", "")).multiply(new BigInteger(localAppendingZerosForTKN));
     	}else {
     		tempBalance=new BigInteger(balance,10).multiply(new BigInteger(appendingZerosForTKN));
     	}
@@ -560,7 +552,7 @@ public class MicroRaiden {
         	System.out.println("Cannot get token balance for "+accountName);
     		return;
         }
-    	System.out.println("Balance of "+accountName+" = "+new Float(new BigInteger(myTokenBalance.substring(2),16).floatValue()/(new BigInteger(appendingZerosForETH,10).floatValue())).toString()+" TKN");
+    	System.out.println("Balance of "+accountName+" = "+new Float(new BigInteger(myTokenBalance.substring(2),16).floatValue()/(new BigInteger(appendingZerosForTKN,10).floatValue())).toString()+" TKN");
     	
     }
     
@@ -614,10 +606,10 @@ public class MicroRaiden {
 	    	if(deposit.length()-deposit.indexOf(".")>19) {
 	    		deposit=deposit.substring(0,deposit.indexOf(".")+19);
 	    	}
-	    	String localAppendingZerosForETH=appendingZerosForTKN.substring(0, appendingZerosForTKN.length()-deposit.length()+1+deposit.indexOf("."));
-	    	initDeposit=new BigInteger(deposit.replace(".", "")).multiply(new BigInteger(localAppendingZerosForETH));
-	    	if(MAX_196_BIT.compareTo(initDeposit)<0) {
-	    		System.out.println("Please choose a deposit <= "+MAX_196_BIT.toString(10));
+	    	String localAppendingZerosForTKN=appendingZerosForTKN.substring(0, appendingZerosForTKN.length()-deposit.length()+1+deposit.indexOf("."));
+	    	initDeposit=new BigInteger(deposit.replace(".", "")).multiply(new BigInteger(localAppendingZerosForTKN));
+	    	if(MAX_DEPOSIT.compareTo(initDeposit)<0) {
+	    		System.out.println("Please choose a deposit <= "+MAX_DEPOSIT.toString(10));
 	    		return;
 	    	}
     	}else {
@@ -770,7 +762,7 @@ public class MicroRaiden {
 	        
 	        String firstArgVal=address.substring(2).toLowerCase();
 	        String secondArgVal=receiverAccountID.substring(2).toLowerCase();
-	        String thirdArgVal=prependingZeros(blockNumberHex.substring(2), 8);
+	        String thirdArgVal=Utility.prependingZeros(blockNumberHex.substring(2), 8);
 	        try{
 	        	byte[] data = concatenateByteArrays(Hex.decodeHex(firstArgVal.toCharArray()),Hex.decodeHex(secondArgVal.toCharArray()),Hex.decodeHex(thirdArgVal.toCharArray()));
 	        	if(debugInfo) {
@@ -1073,14 +1065,6 @@ public class MicroRaiden {
     	
     }
     
-    public void updateBalance() {
-        System.out.println("UPDATE BALANCE");
-    }
-    
-    public void closeChannel() {
-        System.out.println("CLOSE CHANNEL");
-    }
-    
     /**
      * Displays a list of all available functions
      */
@@ -1095,7 +1079,12 @@ public class MicroRaiden {
             		|| m.getName().equals("getECKeyByName")
             		|| m.getName().equals("concatenateByteArrays")
             		|| m.getName().equals("getHttpResponse")
-            		|| m.getName().equals("waitingForTransaction")) {
+            		|| m.getName().equals("waitingForTransaction")
+            		|| m.getName().equals("getNonce")
+            		|| m.getName().equals("getBalanceMsgHashSig")
+            		|| m.getName().equals("getClosingMsgHashSig")
+            		|| m.getName().equals("getClosingMsgHash")
+            		|| m.getName().equals("getBalanceMsgHash")) {
                 continue;
             }
             
@@ -1113,7 +1102,7 @@ public class MicroRaiden {
     }
 
     
-    public void getNonce(String accountName) {
+    private void getNonce(String accountName) {
     	JSONParser parser = new JSONParser();
     	JSONObject jobj=new JSONObject();
     	ECKey keyPair = new ECKey();
@@ -1186,6 +1175,72 @@ public class MicroRaiden {
 
             JSONObject jsonObject =  (JSONObject) obj;
             for (Object key : jsonObject.keySet()) {
+            	switch((String)key) {
+            		case "debugInfo":
+            			debugInfo=((String) jsonObject.get(key)).equals("true")?true:false;
+            			break;
+            		case "gasPrice":
+            			gasPrice=new BigInteger((String) jsonObject.get(key),10);
+                        if(debugInfo) {
+                        	System.out.println("The global gas price is set to be "+gasPrice.toString(10));
+                        }
+            			break;
+            		case "rpcAddress":
+            			rpcAddress=((String) jsonObject.get(key));
+                        if(debugInfo) {
+                        	System.out.println("rpcAddress = "+rpcAddress);
+                        }
+            			break;
+            		case "channelAddr":
+            			channelAddr=((String) jsonObject.get(key));
+                        if(debugInfo) {
+                        	System.out.println("channelAddr = "+channelAddr);
+                        }
+            			break;
+            		case "tokenAddr":
+            			tokenAddr=((String) jsonObject.get(key));
+                        if(debugInfo) {
+                        	System.out.println("tokenAddr = "+tokenAddr);
+                        }
+            			break;
+            		case "channelABI":
+            			channelABI=((String) jsonObject.get(key));
+                        if(debugInfo) {
+                        	System.out.println("channelABI = "+channelABI);
+                        }
+                        channelContract = new CallTransaction.Contract(channelABI);
+            			break;
+            		case "tokenABI":
+            			tokenABI=((String) jsonObject.get(key));
+                        if(debugInfo) {
+                        	System.out.println("tokenABI = "+tokenABI);
+                        }
+                        tokenContract = new CallTransaction.Contract(tokenABI);
+            			break;
+            		case "appendingZerosForETH":
+            			appendingZerosForETH=((String) jsonObject.get(key));
+                        if(debugInfo) {
+                        	System.out.println("appendingZerosForETH = "+appendingZerosForETH);
+                        }
+            			break;
+            		case "appendingZerosForTKN":
+            			appendingZerosForTKN=((String) jsonObject.get(key));
+                        if(debugInfo) {
+                        	System.out.println("appendingZerosForTKN = "+appendingZerosForTKN);
+                        }
+            			break;
+            		case "maxDepositBits":
+            			MAX_DEPOSIT=new BigInteger("2",10).pow(Integer.parseInt(((String) jsonObject.get(key))));
+            			gasPrice=new BigInteger((String) jsonObject.get(key),10);
+                        if(debugInfo) {
+                        	System.out.println("MAX_DEPOSIT ="+MAX_DEPOSIT.toString(16));
+                        }
+            			break;
+
+            			
+            		default:
+            			System.out.println("Unknown key is detected when parsing the configuration files.");
+            	}
                 if (((String)key).equalsIgnoreCase("debugInfo")) {
                 	debugInfo=((String) jsonObject.get(key)).equals("true")?true:false;
                 }
@@ -1201,9 +1256,9 @@ public class MicroRaiden {
         } catch (FileNotFoundException e) {
         	
         } catch (ParseException e) {
-        	System.out.println("Couldn't parse contents in m-ethereum.conf as a JSON object.");
+        	System.out.println("Couldn't parse contents in m-ethereum.conf as a JSON object."+e);
         } catch (IOException e) {
-        	System.out.println("Couldn't parse contents in m-ethereum.conf as a JSON object.");
+        	System.out.println("Couldn't parse contents in m-ethereum.conf as a JSON object."+e);
         }
         
         if(args.length < 1) {
