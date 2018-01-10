@@ -10,6 +10,7 @@ tmp/
 *.bak
 *.swp
 *~.nib
+*.pkey
 local.properties
 .settings/
 .loadpath
