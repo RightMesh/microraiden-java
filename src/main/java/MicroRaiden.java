@@ -270,10 +270,10 @@ public class MicroRaiden {
 
     	}
     	byte[] dataTypeName="string message_idaddress receiveruint32 block_createduint192 balanceaddress contract".getBytes();
-    	byte[] dataValue=concatenateByteArrays("Sender balance proof signature".getBytes(),receiverAddressBytes,openBlockNumberBytes,balanceInChannelBytes,channelAddressBytes);
-    	byte[] result = getSHA3HashHex(concatenateByteArrays(getSHA3HashHex(dataTypeName),getSHA3HashHex(dataValue)));
+    	byte[] dataValue=Utility.concatenateByteArrays("Sender balance proof signature".getBytes(),receiverAddressBytes,openBlockNumberBytes,balanceInChannelBytes,channelAddressBytes);
+    	byte[] result = getSHA3HashHex(Utility.concatenateByteArrays(getSHA3HashHex(dataTypeName),getSHA3HashHex(dataValue)));
     	if(debugInfo) {
-    		System.out.println("The value to be hashed in getBalanceMessageHash is "+new String(Hex.encodeHexString(concatenateByteArrays(getSHA3HashHex(dataTypeName),getSHA3HashHex(dataValue)))));
+    		System.out.println("The value to be hashed in getBalanceMessageHash is "+new String(Hex.encodeHexString(Utility.concatenateByteArrays(getSHA3HashHex(dataTypeName),getSHA3HashHex(dataValue)))));
     		System.out.println("The result of getBalanceMessageHash is "+new String(Hex.encodeHexString(result)));
     	}
     	return result;
@@ -338,10 +338,10 @@ public class MicroRaiden {
 
     	}
     	byte[] dataTypeName = "string message_idaddress senderuint32 block_createduint192 balanceaddress contract".getBytes();
-    	byte[] dataValue= concatenateByteArrays("Receiver closing signature".getBytes(),receiverAddressBytes,openBlockNumberBytes,balanceInChannelBytes,channelAddressBytes);
-    	byte[] result = getSHA3HashHex(concatenateByteArrays(getSHA3HashHex(dataTypeName),getSHA3HashHex(dataValue)));
+    	byte[] dataValue= Utility.concatenateByteArrays("Receiver closing signature".getBytes(),receiverAddressBytes,openBlockNumberBytes,balanceInChannelBytes,channelAddressBytes);
+    	byte[] result = getSHA3HashHex(Utility.concatenateByteArrays(getSHA3HashHex(dataTypeName),getSHA3HashHex(dataValue)));
     	if(debugInfo) {
-    		System.out.println("The value to be hashed in getClosingMsgHash is "+new String(Hex.encodeHexString(concatenateByteArrays(getSHA3HashHex(dataTypeName),getSHA3HashHex(dataValue)))));
+    		System.out.println("The value to be hashed in getClosingMsgHash is "+new String(Hex.encodeHexString(Utility.concatenateByteArrays(getSHA3HashHex(dataTypeName),getSHA3HashHex(dataValue)))));
     		System.out.println("The result of getClosingMsgHash is "+new String(Hex.encodeHexString(result)));
     	}
     	return result;
@@ -764,7 +764,7 @@ public class MicroRaiden {
 	        String secondArgVal=receiverAccountID.substring(2).toLowerCase();
 	        String thirdArgVal=Utility.prependingZeros(blockNumberHex.substring(2), 8);
 	        try{
-	        	byte[] data = concatenateByteArrays(Hex.decodeHex(firstArgVal.toCharArray()),Hex.decodeHex(secondArgVal.toCharArray()),Hex.decodeHex(thirdArgVal.toCharArray()));
+	        	byte[] data = Utility.concatenateByteArrays(Hex.decodeHex(firstArgVal.toCharArray()),Hex.decodeHex(secondArgVal.toCharArray()),Hex.decodeHex(thirdArgVal.toCharArray()));
 	        	if(debugInfo) {
 	        		System.out.println("The keccak256 argument of bytes in string "+Hex.encodeHexString(data));	
 	        	}
@@ -779,30 +779,6 @@ public class MicroRaiden {
         }
     	return;
 
-    }
-    
-    /**
-     * Helper function to join two byte arrays together.
-     * @param a the first byte array
-     * @param b the second byte array
-     * @return the merged array
-     */
-    private static byte[] concatenateByteArrays(byte[]... arrays)
-    {
-        int count = 0;
-        for (byte[] array: arrays)
-        {
-            count += array.length;
-        }
-
-        // Create new array and copy all array contents
-        byte[] mergedArray = new byte[count];
-        int start = 0;
-        for (byte[] array: arrays) {
-            System.arraycopy(array, 0, mergedArray, start, array.length);
-            start += array.length;
-        }
-        return mergedArray;
     }
     
     private String getHttpResponse(String requestString) throws IOException{
