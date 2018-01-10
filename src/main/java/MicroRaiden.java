@@ -52,38 +52,7 @@ public class MicroRaiden {
     
     private static Http httpAgent=null;
 
-    /*
-    private boolean running=false;
-    private String mytransactionID = null;
-    private final Object lockID = new Object();
-    private final Object lockRunning = new Object();
-    public void newTransactionID(String id) {
-        synchronized (lockID) {
-        	mytransactionID = id;
-        }
-    }
-
-    public String getTransactionID() {
-        synchronized (lockID) {
-            String temp = mytransactionID;
-            mytransactionID = null;
-            return temp;
-        }
-    }
-    
-    public void enableRunning() {
-        synchronized (lockRunning) {
-        	running = true;
-        }
-    }
-
-    public void disableRunning() {
-        synchronized (lockRunning) {
-        	running = false;
-        }
-    }
-    */
-	public MicroRaiden() {
+   	public MicroRaiden() {
         //should probably create an eth account with priv / pub keys
         //for doing the signing in the constructor
         
