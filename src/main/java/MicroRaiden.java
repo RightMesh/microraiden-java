@@ -35,6 +35,9 @@ import org.kocakosm.pitaya.security.Digests;
  * CLI for the MicroRaiden client
  */
 public class MicroRaiden {
+	private static final int LENGTH_OF_ID_IN_BYTES=20;
+    private static final int INTERVAL_CHECK_TRANS_DONE=100;
+	
 	private static String rpcAddress=null;
 	private static String channelAddr=null;
 	private static String tokenAddr=null;
@@ -48,7 +51,7 @@ public class MicroRaiden {
     private static BigInteger MAX_DEPOSIT=null;
     private static BigInteger gasPrice=null;
     private static boolean debugInfo=false;
-    private static final int INTERVAL_CHECK_TRANS_DONE=100;
+
     
     private static Http httpAgent=null;
 
@@ -196,7 +199,7 @@ public class MicroRaiden {
     		System.out.println("The provided receiver's address is not valid.");
     		return null;
     	}
-		if(receiverAddressBytes.length!=20) {
+		if(receiverAddressBytes.length!=LENGTH_OF_ID_IN_BYTES) {
 			System.out.println("The provided receiver's address is not valid.");
 			return null;
 		}
