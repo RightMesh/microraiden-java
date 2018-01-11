@@ -94,8 +94,10 @@ public class MicroRaiden {
     }
     
     public void createAccountByPrivateKey(String accountFile, String privateKeyHex) {
-    	if(privateKeyHex.startsWith("0x")) {
-    		privateKeyHex=privateKeyHex.substring(2);
+    	privateKeyHex=privateKeyHex.startsWith("0x")?privateKeyHex.substring(2):privateKeyHex;
+    	if(privateKeyHex.length()!=64) {
+    		System.out.println("The private key should be given in 64 HEX numbers.");
+    		return;
     	}
         ECKey keyPair = new ECKey();
         try{
@@ -106,7 +108,6 @@ public class MicroRaiden {
         String address = new String(Hex.encodeHex(keyPair.getAddress()));
         System.out.println("Generated new account: 0x" + address);
         byte[] priv = keyPair.getPrivKeyBytes();
-        
         try {
             OutputStream os = new FileOutputStream(accountFile + ".pkey");
             JSONObject obj=new JSONObject();
