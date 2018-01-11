@@ -46,6 +46,13 @@ dependencies {
 	// https://mvnrepository.com/artifact/org.kocakosm/pitaya
 	compile group: 'org.kocakosm', name: 'pitaya', version: '0.4'
 	
+	// https://mvnrepository.com/artifact/org.whispersystems/signal-protocol-java
+	compile group: 'org.whispersystems', name: 'signal-protocol-java', version: '2.4.0'
+	
+	// https://mvnrepository.com/artifact/com.lambdaworks/scrypt
+	compile group: 'com.lambdaworks', name: 'scrypt', version: '1.4.0'
+	
+	
 }
 
 // Define the main class for the application

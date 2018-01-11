@@ -23,6 +23,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.ethereum.core.CallTransaction;
 import org.ethereum.core.Transaction;
+import org.ethereum.core.CallTransaction.Contract;
 import org.ethereum.crypto.ECKey;
 import org.ethereum.util.ByteUtil;
 import org.json.simple.JSONObject;
@@ -118,39 +119,39 @@ public class MicroRaiden {
         }
     }
     
-    public void loadAccountAndSignRecoverable(String accountName, String msgHashHex){
-    	if(msgHashHex.startsWith("0x")) {
-    		msgHashHex=msgHashHex.substring(2);
-    	}
-    	byte [] msgHashBytes=new byte[0];
-    	try {
-    		msgHashBytes=Hex.decodeHex(msgHashHex.toCharArray());
-    	}catch (DecoderException e) {
-        	System.out.println("Couldn't convert msgHashHex = " + msgHashHex + " to byte array.");
-        } 
-    	JSONParser parser = new JSONParser();
-    	ECKey keyPair = new ECKey();
-    	String privateKeyHex=new String();
-        try {     
-            Object obj = parser.parse(new FileReader(accountName+".pkey"));
-
-            JSONObject jsonObject =  (JSONObject) obj;
-
-            privateKeyHex = (String) jsonObject.get("privkey");
-            keyPair=ECKey.fromPrivate(Hex.decodeHex(privateKeyHex.toCharArray()));
-            
-        } catch (FileNotFoundException e) {
-        	System.out.println("Couldn't locate account file " + accountName + ".pkey");
-        } catch (ParseException e) {
-        	System.out.println("Couldn't parse contents in " + accountName + ".pkey as a JSON object.");
-        } catch (DecoderException e) {
-        	System.out.println("Couldn't create ECKey with privateKeyHex = " + privateKeyHex);
-        } catch (IOException e) {
-        	
-        }
-        String signature=keyPair.sign(msgHashBytes).toHex();
-        System.out.println("The signed recoverable signature is 0x" + signature + ".");
-    }
+//    public void loadAccountAndSignRecoverable(String accountName, String msgHashHex){
+//    	if(msgHashHex.startsWith("0x")) {
+//    		msgHashHex=msgHashHex.substring(2);
+//    	}
+//    	byte [] msgHashBytes=new byte[0];
+//    	try {
+//    		msgHashBytes=Hex.decodeHex(msgHashHex.toCharArray());
+//    	}catch (DecoderException e) {
+//        	System.out.println("Couldn't convert msgHashHex = " + msgHashHex + " to byte array.");
+//        } 
+//    	JSONParser parser = new JSONParser();
+//    	ECKey keyPair = new ECKey();
+//    	String privateKeyHex=new String();
+//        try {     
+//            Object obj = parser.parse(new FileReader(accountName+".pkey"));
+//
+//            JSONObject jsonObject =  (JSONObject) obj;
+//
+//            privateKeyHex = (String) jsonObject.get("privkey");
+//            keyPair=ECKey.fromPrivate(Hex.decodeHex(privateKeyHex.toCharArray()));
+//            
+//        } catch (FileNotFoundException e) {
+//        	System.out.println("Couldn't locate account file " + accountName + ".pkey");
+//        } catch (ParseException e) {
+//        	System.out.println("Couldn't parse contents in " + accountName + ".pkey as a JSON object.");
+//        } catch (DecoderException e) {
+//        	System.out.println("Couldn't create ECKey with privateKeyHex = " + privateKeyHex);
+//        } catch (IOException e) {
+//        	
+//        }
+//        String signature=keyPair.sign(msgHashBytes).toHex();
+//        System.out.println("The signed recoverable signature is 0x" + signature + ".");
+//    }
 
     /**
      * Reads all of the account files in the directory and lists which
@@ -219,22 +220,13 @@ public class MicroRaiden {
     		System.out.println("The provided open block n is not valid.");
     		return null;
     	}
-    	try{
-    		Double.parseDouble(balance);
-    	}catch (NumberFormatException e) {
+    	
+    	BigInteger tempBalance=null;
+    	try {
+    		tempBalance=Utility.decimalToBigInteger(balance, appendingZerosForTKN);
+    	}catch(NumberFormatException e) {
     		System.out.println("The provided balance is not valid.");
     		return null;
-    	}
-    	
-    	BigInteger tempBalance=new BigInteger("0");
-    	if(balance.indexOf(".")!=-1) {
-	    	if(balance.length()-balance.indexOf(".")>19) {
-	    		balance=balance.substring(0,balance.indexOf(".")+19);
-	    	}
-	    	String localAppendingZerosForTKN=appendingZerosForTKN.substring(0, appendingZerosForTKN.length()-balance.length()+1+balance.indexOf("."));
-	    	tempBalance=new BigInteger(balance.replace(".", "")).multiply(new BigInteger(localAppendingZerosForTKN));
-    	}else {
-    		tempBalance=new BigInteger(balance,10).multiply(new BigInteger(appendingZerosForTKN));
     	}
     	
     	try{
@@ -287,23 +279,15 @@ public class MicroRaiden {
     		System.out.println("The provided open block n is not valid.");
     		return null;
     	}
-    	try{
-    		Double.parseDouble(balance);
-    	}catch (NumberFormatException e) {
+    	
+    	BigInteger tempBalance=null;
+    	try {
+    		tempBalance=Utility.decimalToBigInteger(balance, appendingZerosForTKN);
+    	}catch(NumberFormatException e) {
     		System.out.println("The provided balance is not valid.");
     		return null;
     	}
-    	
-    	BigInteger tempBalance=new BigInteger("0");
-    	if(balance.indexOf(".")!=-1) {
-	    	if(balance.length()-balance.indexOf(".")>19) {
-	    		balance=balance.substring(0,balance.indexOf(".")+19);
-	    	}
-	    	String localAppendingZerosForTKN=appendingZerosForTKN.substring(0, appendingZerosForTKN.length()-balance.length()+1+balance.indexOf("."));
-	    	tempBalance=new BigInteger(balance.replace(".", "")).multiply(new BigInteger(localAppendingZerosForTKN));
-    	}else {
-    		tempBalance=new BigInteger(balance,10).multiply(new BigInteger(appendingZerosForTKN));
-    	}
+
     	
     	try{
     		openBlockNumberBytes=Hex.decodeHex(Utility.prependingZeros(Integer.toHexString(Integer.parseInt(open_block_number)),8).toCharArray());
@@ -320,19 +304,14 @@ public class MicroRaiden {
     	}
     	return result;
     }
-    private static byte[] getClosingMsgHashSig(String senderName,String channelAddr, String openBlockNum, String balance, String receiverName) {
-    	ECKey senderKeyPair=getECKeyByName(senderName);
-    	if(senderKeyPair==null) {
-    		System.out.println("Cannot load account with name "+senderName+".");
+    private static byte[] getClosingMsgHashSig(String senderAddr,String channelAddr, String openBlockNum, String balance, String receiverName) {
+    	Wallet receiverWallet=null;
+    	try {
+    		receiverWallet=new Wallet(receiverName);
+    		receiverWallet.update(httpAgent);
+    	}catch(Exception e) {
     		return null;
     	}
-    	ECKey receiverKeyPair=getECKeyByName(receiverName);
-    	if(receiverKeyPair==null) {
-    		System.out.println("Cannot load account with name "+receiverName+".");
-    		return null;
-    	}
-        
-        String senderAddr = "0x"+new String(Hex.encodeHex(senderKeyPair.getAddress()));
         byte [] closingMsgHash=getClosingMsgHash(senderAddr,openBlockNum,balance,channelAddr); 
         if(closingMsgHash==null) {
         	System.out.println("Argument Error.");
@@ -345,41 +324,58 @@ public class MicroRaiden {
         	System.out.println("Couldn't convert msgHashHex = 0x" + Hex.encodeHexString(closingMsgHash) + " to byte array.");
         	return null;
     	}
-        return receiverKeyPair.sign(closingMsgHashHex).toByteArray();
+        return receiverWallet.signMessage(closingMsgHashHex);
     	
     }
-    private static byte[] getBalanceMsgHashSig(String receiverName,String channelAddr, String openBlockNum, String balance, String senderName) {
-    	ECKey receiverKeyPair=getECKeyByName(receiverName);
-    	if(receiverKeyPair==null) {
-    		System.out.println("Cannot load account with name "+receiverName+".");
+    private static byte[] getBalanceMsgHashSig(String receiverAddr,String channelAddr, String openBlockNum, String balance, String senderName) {
+    	Wallet senderWallet=null;
+    	try {
+    		senderWallet=new Wallet(senderName);
+    		senderWallet.update(httpAgent);
+    	}catch(Exception e) {
     		return null;
     	}
-    	ECKey senderKeyPair=getECKeyByName(senderName);
-    	if(senderKeyPair==null) {
-    		System.out.println("Cannot load account with name "+senderName+".");
-    		return null;
-    	}
-        
-        String address = "0x"+new String(Hex.encodeHex(receiverKeyPair.getAddress()));
-        byte [] balanceMsgHash=getBalanceMsgHash(address,openBlockNum,balance,channelAddr);
+
+        byte [] balanceMsgHash=getBalanceMsgHash(receiverAddr,openBlockNum,balance,channelAddr);
         if(balanceMsgHash==null) {
         	System.out.println("Argument Error.");
         	return null;
         }
         byte [] balanceMsgHashHex=null;
     	try {
-    		balanceMsgHashHex=Hex.decodeHex(Hex.encodeHexString(balanceMsgHash).toCharArray());
+    		balanceMsgHashHex=Hex.decodeHex(new String(Hex.encodeHex(balanceMsgHash)).toCharArray());
     	}catch (DecoderException e) {
         	System.out.println("Couldn't convert msgHashHex = 0x" + Hex.encodeHexString(balanceMsgHash) + " to byte array.");
         	return null;
-    	} 
-        return senderKeyPair.sign(balanceMsgHashHex).toByteArray();
-    	
+    	}
+        return senderWallet.signMessage(balanceMsgHashHex);
     }
 	
     public void closeChannelCooperatively(String delegatorName, String senderName, String receiverName, String openBlockNum, String balance) {
-    	byte[] closing_Msg_Hash_Sig=getClosingMsgHashSig(senderName,channelAddr,openBlockNum,balance,receiverName);
-    	byte[] balance_Msg_Hash_Sig=getBalanceMsgHashSig(receiverName,channelAddr,openBlockNum,balance,senderName);
+    	BigInteger tempBalance=null;
+    	try {
+    		tempBalance=Utility.decimalToBigInteger(balance, appendingZerosForTKN);
+    	}catch(NumberFormatException e) {
+    		System.out.println("The provided balance is not valid.");
+    		return;
+    	}
+    	Wallet delegatorWallet=null;
+    	Wallet senderWallet=null;
+    	Wallet receiverWallet=null;
+    	try {
+    		delegatorWallet=new Wallet(delegatorName);
+    		delegatorWallet.update(httpAgent);
+    		senderWallet=new Wallet(senderName);
+    		senderWallet.update(httpAgent);
+    		receiverWallet=new Wallet(receiverName);
+    		receiverWallet.update(httpAgent);
+    	}catch(Exception e) {
+    		System.out.println("The delagator/sender/receiver cannot be found.");
+    		return;
+    	}
+        
+    	byte[] closing_Msg_Hash_Sig=getClosingMsgHashSig(senderWallet.getAccountID(),channelAddr,openBlockNum,balance,receiverName);
+    	byte[] balance_Msg_Hash_Sig=getBalanceMsgHashSig(receiverWallet.getAccountID(),channelAddr,openBlockNum,balance,senderName);
     	if(closing_Msg_Hash_Sig==null||balance_Msg_Hash_Sig==null) {
     		System.out.println("Argument Error!");
     		return;
@@ -395,38 +391,18 @@ public class MicroRaiden {
     	byte[] closing_Msg_Hash_Sig_s=Arrays.copyOfRange(closing_Msg_Hash_Sig, 32, 64);
     	byte[] closing_Msg_Hash_Sig_v=Arrays.copyOfRange(closing_Msg_Hash_Sig, 64, 65);
 
-    	
-    	ECKey keyPair=getECKeyByName(delegatorName);
-    	if(keyPair==null) {
-    		System.out.println("Cannot load account with name "+delegatorName+".");
-    		return;
-    	}
-        
-        String address = "0x"+new String(Hex.encodeHex(keyPair.getAddress()));
-    	
-        
     	//if(debugInfo) {
     		System.out.println("User "+delegatorName+" is the delegator to close the channel "+senderName+" ==> "+receiverName+" at balance = "+balance+".");
     	//}
-        
-    	BigInteger tempBalance=new BigInteger("0");
-    	if(balance.indexOf(".")!=-1) {
-	    	if(balance.length()-balance.indexOf(".")>19) {
-	    		balance=balance.substring(0,balance.indexOf(".")+19);
-	    	}
-	    	String localAppendingZerosForTKN=appendingZerosForTKN.substring(0, appendingZerosForTKN.length()-balance.length()+1+balance.indexOf("."));
-	    	tempBalance=new BigInteger(balance.replace(".", "")).multiply(new BigInteger(localAppendingZerosForTKN));
-    	}else {
-    		tempBalance=new BigInteger(balance,10).multiply(new BigInteger(appendingZerosForTKN));
-    	}
+       
     	
         CallTransaction.Function cooperativeClose=channelContract.getByName("cooperativeClose");
-        byte [] cooperativeCloseFunctionBytes=cooperativeClose.encode("0x"+new String(Hex.encodeHex(getECKeyByName(receiverName).getAddress())),
+        byte [] cooperativeCloseFunctionBytes=cooperativeClose.encode(receiverWallet.getAccountID(),
         		new BigInteger(openBlockNum,10),tempBalance,balance_Msg_Hash_Sig_r,balance_Msg_Hash_Sig_s,new BigInteger(balance_Msg_Hash_Sig_v),closing_Msg_Hash_Sig_r,closing_Msg_Hash_Sig_s,new BigInteger(closing_Msg_Hash_Sig_v)); 
         String querycooperativeCloseGasString = "{\"method\":\"eth_estimateGas\"," +
                 "\"params\":[" +
                 "{" +
-                "\"from\":\""+address+"\"," +
+                "\"from\":\""+delegatorWallet.getAccountID()+"\"," +
                 "\"to\":\""+channelAddr+"\"," +
                 "\"value\":\""+"0x"+new BigInteger("0",10).toString(16)+"\","+
                 "\"data\":\""+"0x" + new String(org.apache.commons.codec.binary.Hex.encodeHex(cooperativeCloseFunctionBytes))+"\"" +
@@ -447,25 +423,13 @@ public class MicroRaiden {
     		System.out.println("The estimatedGas of cooperative channel closing is "+cooperativeCloseGasEstimate+".");
     	}
     	
-    	String queryNonceString="{\"method\":\"parity_nextNonce\",\"params\":[\""+address+"\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
-    	String myNonceResult="";
-    	try {
-    		myNonceResult=httpAgent.getHttpResponse(queryNonceString);
-        }catch (IOException e) {
-        	System.out.println("Nonce with account "+delegatorName+" cannot be found.");
-    		return;		
-        }
-    	if(debugInfo) {
-    		System.out.println("The nonce of "+delegatorName+" is "+myNonceResult);
-    	}
-    	
-        Transaction cooperativeCloseTrans = new Transaction(bigIntegerToBytes(new BigInteger(myNonceResult.substring(2),16)), // nonce
-                bigIntegerToBytes(gasPrice), // gas price
-                bigIntegerToBytes(new BigInteger(cooperativeCloseGasEstimate.substring(2),16)), // gas limit
+        Transaction cooperativeCloseTrans = new Transaction(Utility.bigIntegerToBytes(delegatorWallet.nonce()), // nonce
+        		Utility.bigIntegerToBytes(gasPrice), // gas price
+        		Utility.bigIntegerToBytes(new BigInteger(cooperativeCloseGasEstimate.substring(2),16)), // gas limit
                 ByteUtil.hexStringToBytes(channelAddr), // to id
-                bigIntegerToBytes(new BigInteger("0",10)), // value
+                Utility.bigIntegerToBytes(new BigInteger("0",10)), // value
                 cooperativeCloseFunctionBytes, 42);// chainid
-        cooperativeCloseTrans.sign(keyPair);
+        delegatorWallet.signTransaction(cooperativeCloseTrans);
         String signedCooperativeCloseTranss = "0x" + new String(org.apache.commons.codec.binary.Hex.encodeHex(cooperativeCloseTrans.getEncoded()));
         String cooperativeCloseSendRawTransactionString = "{\"method\":\"eth_sendRawTransaction\",\"params\":[\""
                 + signedCooperativeCloseTranss + "\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
@@ -497,16 +461,17 @@ public class MicroRaiden {
     }
     
     public void getTokenBalance(String accountName){
-    	ECKey keyPair=getECKeyByName(accountName);
-    	if(keyPair==null) {
-    		System.out.println("Cannot load account with name "+accountName+".");
+    	Wallet myWallet=null;
+    	try{
+    		myWallet=new Wallet(accountName);
+    		myWallet.update(httpAgent);
+    	}catch(Exception e) {
+    		System.out.println("The wallet cannot be retrived for "+accountName);
     		return;
     	}
         
-        String address = "0x"+new String(Hex.encodeHex(keyPair.getAddress()));
-        
         CallTransaction.Function balanceOf = tokenContract.getByName("balanceOf");
-        byte [] functionBytes=balanceOf.encode(address);
+        byte [] functionBytes=balanceOf.encode(myWallet.getAccountID());
         String requestString = "{\"method\":\"eth_call\"," +
                 "\"params\":[" +
                 "{" +
@@ -529,79 +494,33 @@ public class MicroRaiden {
     	System.out.println("Balance of "+accountName+" = "+new Float(new BigInteger(myTokenBalance.substring(2),16).floatValue()/(new BigInteger(appendingZerosForTKN,10).floatValue())).toString()+" TKN");
     	
     }
-    
-    private static ECKey getECKeyByName(String accountName) {
-    	JSONParser parser = new JSONParser();
-    	JSONObject jobj=new JSONObject();
-        try {     
-        	jobj = (JSONObject)parser.parse(new FileReader(accountName+".pkey"));
-            
-        } catch (FileNotFoundException e) {
-        	System.out.println("Couldn't locate account file " + accountName + ".pkey");
-        	return null;
-        } catch (ParseException e) {
-        	System.out.println("Couldn't parse contents in " + accountName + ".pkey as a JSON object.");
-        	return null;
-        } catch (IOException e) {
-        	System.out.println("Couldn't parse contents in " + accountName + ".pkey as a JSON object.");
-        	return null;
-        }
-        String  privateKeyHex = (String) jobj.get("privkey");
-        try{
-            return ECKey.fromPrivate(Hex.decodeHex(privateKeyHex.toCharArray()));
-        }catch (DecoderException e) {
-        	System.out.println("PrivateKeyHex = " + privateKeyHex + " is invalid.");
-        	return null;
-        } 
-    }
-	private static byte[] bigIntegerToBytes(BigInteger value) {
-        if (value == null)
-            return null;
-
-        byte[] data = value.toByteArray();
-
-        if (data.length != 1 && data[0] == 0) {
-            byte[] tmp = new byte[data.length - 1];
-            System.arraycopy(data, 1, tmp, 0, tmp.length);
-            data = tmp;
-        }
-        return data;
-    }
+   
     
     public void createChannel(String senderAccountName, String receiverAccountName, String deposit) {
-    	try{
-    		Double.parseDouble(deposit);
-    	}catch (NumberFormatException e) {
-    		System.out.println("The numer format is wrong.");
+    	BigInteger initDeposit=null;
+    	try {
+    		initDeposit=Utility.decimalToBigInteger(deposit, appendingZerosForTKN);
+    	}catch(NumberFormatException e) {
+    		System.out.println("The provided balance is not valid.");
+    		return;
+    	}	    	
+    	if(MAX_DEPOSIT.compareTo(initDeposit)<0) {
+    		System.out.println("Please choose a deposit <= "+MAX_DEPOSIT.toString(10));
     		return;
     	}
-    	BigInteger initDeposit=new BigInteger("0");
-    	if(deposit.indexOf(".")!=-1) {
-	    	if(deposit.length()-deposit.indexOf(".")>19) {
-	    		deposit=deposit.substring(0,deposit.indexOf(".")+19);
-	    	}
-	    	String localAppendingZerosForTKN=appendingZerosForTKN.substring(0, appendingZerosForTKN.length()-deposit.length()+1+deposit.indexOf("."));
-	    	initDeposit=new BigInteger(deposit.replace(".", "")).multiply(new BigInteger(localAppendingZerosForTKN));
-	    	if(MAX_DEPOSIT.compareTo(initDeposit)<0) {
-	    		System.out.println("Please choose a deposit <= "+MAX_DEPOSIT.toString(10));
-	    		return;
-	    	}
-    	}else {
-    		initDeposit=new BigInteger(deposit,10).multiply(new BigInteger(appendingZerosForTKN));
-    	}
-    	ECKey keyPairSender=getECKeyByName(senderAccountName);
-    	if(keyPairSender==null) {
-    		System.out.println("Cannot load sender's account with name "+senderAccountName+".");
+    	Wallet senderWallet=null;
+    	Wallet receiverWallet=null;
+    	try {
+    		senderWallet=new Wallet(senderAccountName);
+    		senderWallet.update(httpAgent);
+    		receiverWallet=new Wallet(receiverAccountName);
+    		receiverWallet.update(httpAgent);
+    	}catch(Exception e) {
+    		System.out.println("The sender/receiver cannot be found.");
     		return;
     	}
-    	ECKey keyPairReceiver=getECKeyByName(receiverAccountName);
-    	if(keyPairReceiver==null) {
-    		System.out.println("Cannot load sender's account with name "+receiverAccountName+".");
-    		return;
-    	}
+
         
-        String address = "0x"+new String(Hex.encodeHex(keyPairSender.getAddress()));
-    	String receiverAccountID = "0x"+new String(Hex.encodeHex(keyPairReceiver.getAddress()));
     	//if(debugInfo) {
     		System.out.println("User "+senderAccountName+" tries to open a channel to pay "+receiverAccountName+" up to " + deposit +" Tokens at maximum.");
     	//}
@@ -611,7 +530,7 @@ public class MicroRaiden {
         String queryApproveGasString = "{\"method\":\"eth_estimateGas\"," +
                 "\"params\":[" +
                 "{" +
-                "\"from\":\""+address+"\"," +
+                "\"from\":\""+senderWallet.getAccountID()+"\"," +
                 "\"to\":\""+tokenAddr+"\"," +
                 "\"value\":\""+"0x"+new BigInteger("0",10).toString(16)+"\","+
                 "\"data\":\""+"0x" + new String(org.apache.commons.codec.binary.Hex.encodeHex(approveFunctionBytes))+"\"" +
@@ -630,27 +549,16 @@ public class MicroRaiden {
         }
     	if(debugInfo) {
     		System.out.println("The estimatedGas of approve is "+approveGasEstimate+".");
+    		System.out.println("The nonce of "+senderAccountName+" is "+senderWallet.nonce().toString(10));
     	}
     	
-    	String queryNonceString="{\"method\":\"parity_nextNonce\",\"params\":[\""+address+"\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
-    	String myNonceResult1="";
-    	try {
-    		myNonceResult1=httpAgent.getHttpResponse(queryNonceString);
-        }catch (IOException e) {
-        	System.out.println("Nonce with account "+senderAccountName+" cannot be found.");
-    		return;		
-        }
-    	if(debugInfo) {
-    		System.out.println("The nonce of "+senderAccountName+" is "+myNonceResult1);
-    	}
-    	
-        Transaction approveTrans = new Transaction(bigIntegerToBytes(new BigInteger(myNonceResult1.substring(2),16)), // nonce
-                bigIntegerToBytes(gasPrice), // gas price
-                bigIntegerToBytes(new BigInteger(approveGasEstimate.substring(2),16)), // gas limit
+        Transaction approveTrans = new Transaction(Utility.bigIntegerToBytes(senderWallet.nonce()), // nonce
+        		Utility.bigIntegerToBytes(gasPrice), // gas price
+        		Utility.bigIntegerToBytes(new BigInteger(approveGasEstimate.substring(2),16)), // gas limit
                 ByteUtil.hexStringToBytes(tokenAddr), // to id
-                bigIntegerToBytes(new BigInteger("0",10)), // value
+                Utility.bigIntegerToBytes(new BigInteger("0",10)), // value
                 approveFunctionBytes, 42);// chainid
-        approveTrans.sign(keyPairSender);
+        senderWallet.signTransaction(approveTrans);
         String signedApproveTrans = "0x" + new String(org.apache.commons.codec.binary.Hex.encodeHex(approveTrans.getEncoded()));
         String approveSendRawTransactionString = "{\"method\":\"eth_sendRawTransaction\",\"params\":[\""
                 + signedApproveTrans + "\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
@@ -670,23 +578,22 @@ public class MicroRaiden {
         if(debugInfo) {
         	System.out.println("\bApproving funding transfer is done.");  	
         }
-        String myNonceResult2="";
         try {
-    		myNonceResult2=httpAgent.getHttpResponse(queryNonceString);
-        }catch (IOException e) {
-        	System.out.println("Nonce with account "+senderAccountName+" cannot be found.");
-    		return;
+        	senderWallet.updateNonce(httpAgent);
+        }catch(Exception e){
+        	System.out.println("Updating nonce value is failed.");
+        	return;
         }
         if(debugInfo) {
-        	System.out.println("The nonce of "+senderAccountName+" is "+myNonceResult2);
+        	System.out.println("The nonce of "+senderAccountName+" is "+senderWallet.nonce().toString(10));
         }
 
     	CallTransaction.Function createChannelERC20 = channelContract.getByName("createChannelERC20");
-        byte [] createChannelERC20FunctionBytes=createChannelERC20.encode(receiverAccountID,initDeposit);        
+        byte [] createChannelERC20FunctionBytes=createChannelERC20.encode(receiverWallet.getAccountID(),initDeposit);        
         String queryCreatChannelGasString = "{\"method\":\"eth_estimateGas\"," +
                 "\"params\":[" +
                 "{" +
-                "\"from\":\""+address+"\"," +
+                "\"from\":\""+senderWallet.getAccountID()+"\"," +
                 "\"to\":\""+channelAddr+"\"," +
                 "\"value\":\""+"0x"+new BigInteger("0",10).toString(16)+"\","+
                 "\"data\":\""+"0x" + new String(org.apache.commons.codec.binary.Hex.encodeHex(createChannelERC20FunctionBytes))+"\"" +
@@ -707,13 +614,13 @@ public class MicroRaiden {
     	if(debugInfo) {
     		System.out.println("The estimatedGas of createChannelERC20 is "+creatChannelGasEstimate);
     	}
-        Transaction createTrans = new Transaction(bigIntegerToBytes(new BigInteger(myNonceResult2.substring(2),16)), // nonce
-                bigIntegerToBytes(gasPrice), // gas price
-                bigIntegerToBytes(new BigInteger(creatChannelGasEstimate.substring(2),16)), // gas limit
+        Transaction createTrans = new Transaction(Utility.bigIntegerToBytes(senderWallet.nonce()), // nonce
+        		Utility.bigIntegerToBytes(gasPrice), // gas price
+        		Utility.bigIntegerToBytes(new BigInteger(creatChannelGasEstimate.substring(2),16)), // gas limit
                 ByteUtil.hexStringToBytes(channelAddr), // to id
-                bigIntegerToBytes(new BigInteger("0",10)), // value
+                Utility.bigIntegerToBytes(new BigInteger("0",10)), // value
                 createChannelERC20FunctionBytes, 42);// chainid
-        createTrans.sign(keyPairSender);
+        senderWallet.signTransaction(createTrans);
         String signedChannelCreationTrans = "0x" + new String(org.apache.commons.codec.binary.Hex.encodeHex(createTrans.getEncoded()));
         String createChannelSendRawTransactionString = "{\"method\":\"eth_sendRawTransaction\",\"params\":[\""
                 + signedChannelCreationTrans + "\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
@@ -734,8 +641,8 @@ public class MicroRaiden {
 	        Digest keccak256 = Digests.keccak256();
 
 	        
-	        String firstArgVal=address.substring(2).toLowerCase();
-	        String secondArgVal=receiverAccountID.substring(2).toLowerCase();
+	        String firstArgVal=senderWallet.getAccountID().substring(2).toLowerCase();
+	        String secondArgVal=receiverWallet.getAccountID().substring(2).toLowerCase();
 	        String thirdArgVal=Utility.prependingZeros(blockNumberHex.substring(2), 8);
 	        try{
 	        	byte[] data = Utility.concatenateByteArrays(Hex.decodeHex(firstArgVal.toCharArray()),Hex.decodeHex(secondArgVal.toCharArray()),Hex.decodeHex(thirdArgVal.toCharArray()));
@@ -756,32 +663,25 @@ public class MicroRaiden {
     }
     
     public void buyToken(String accountName,String amountOfEther){
-    	ECKey keyPair=getECKeyByName(accountName);
-    	if(keyPair==null) {
-    		System.out.println("Cannot load account with name "+accountName+".");
+    	BigInteger value=null;
+    	try {
+    		value=Utility.decimalToBigInteger(amountOfEther, appendingZerosForETH);
+    	}catch(NumberFormatException e) {
+    		System.out.println("The provided balance is not valid.");
     		return;
-    	}
-        
-        String address = "0x"+new String(Hex.encodeHex(keyPair.getAddress()));
-        
+    	}	
+    	
+    	Wallet myWallet=null;
     	try{
-    		Double.parseDouble(amountOfEther);
-    	}catch (NumberFormatException e) {
-    		System.out.println("The numer format is wrong.");
+    		myWallet=new Wallet(accountName);
+    		myWallet.update(httpAgent);
+    	}catch(Exception e) {
+    		System.out.println("Cannot retrive the wallet for "+accountName);
     		return;
     	}
-    	BigInteger value=new BigInteger("0");
-    	if(amountOfEther.indexOf(".")!=-1) {
-	    	if(amountOfEther.length()-amountOfEther.indexOf(".")>19) {
-	    		amountOfEther=amountOfEther.substring(0,amountOfEther.indexOf(".")+19);
-	    	}
-	    	String localAppendingZerosForETH=appendingZerosForETH.substring(0, appendingZerosForETH.length()-amountOfEther.length()+1+amountOfEther.indexOf("."));
-	    	value=new BigInteger(amountOfEther.replace(".", "")).multiply(new BigInteger(localAppendingZerosForETH));
-    	}else {
-    		value=new BigInteger(amountOfEther,10).multiply(new BigInteger(appendingZerosForETH));
-    	}
+    	
     	if(debugInfo) {
-    		System.out.println("User "+accountName+"("+address+") will trade "+value.toString()+" Wei to Token.");
+    		System.out.println("User "+accountName+"("+myWallet.getAccountID()+") will trade "+value.toString()+" Wei to Token.");
     	}
         
         CallTransaction.Function mint = tokenContract.getByName("mint");
@@ -789,7 +689,7 @@ public class MicroRaiden {
         String queryGasString = "{\"method\":\"eth_estimateGas\"," +
                 "\"params\":[" +
                 "{" +
-                "\"from\":\""+address+"\"," +
+                "\"from\":\""+myWallet.getAccountID()+"\"," +
                 "\"to\":\""+tokenAddr+"\"," +
                 "\"value\":\""+"0x"+value.toString(16)+"\","+
                 "\"data\":\""+"0x" + new String(org.apache.commons.codec.binary.Hex.encodeHex(functionBytes))+"\"" +
@@ -807,41 +707,26 @@ public class MicroRaiden {
     		System.out.println("The estimatedGas of mint is "+gasEstimateResult);
     	}
     	
-    	String queryTokenBalanceString="{\"method\":\"eth_getBalance\",\"params\":[\""+address+"\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
-        String myEtherBalance="";
-    	try {
-    		myEtherBalance=httpAgent.getHttpResponse(queryTokenBalanceString);
-        }catch (IOException e) {
-        	System.out.println("Invoking function with given arguments is not allowed.");
-    		return;
-        }
     	if(debugInfo) {
-    		System.out.println("Total ether balance of "+accountName+" is "+myEtherBalance);
+    		System.out.println("Total ether balance of "+accountName+" is "+myWallet.etherBalance().toString(10));
     	}
-    	if(new BigInteger(gasEstimateResult.substring(2),16).multiply(gasPrice).add(value).compareTo(new BigInteger(myEtherBalance.substring(2),16))>0) {
+    	if(new BigInteger(gasEstimateResult.substring(2),16).multiply(gasPrice).add(value).compareTo(myWallet.etherBalance())>0) {
     		System.out.println("Insufficient Ether to finish the transaction.");
     		return;
     	}
     	
-    	String queryNonceString="{\"method\":\"parity_nextNonce\",\"params\":[\""+address+"\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
-    	String myNonceResult="";
-    	try {
-    		myNonceResult=httpAgent.getHttpResponse(queryNonceString);
-        }catch (IOException e) {
-        	System.out.println("Nonce with account "+accountName+" cannot be found.");
-    		return;
-        }
+    
     	if(debugInfo) {
-    		System.out.println("The nonce of "+accountName+" is "+myNonceResult);
+    		System.out.println("The nonce of "+accountName+" is "+myWallet.nonce());
     	}
     	
-        Transaction t = new Transaction(bigIntegerToBytes(new BigInteger(myNonceResult.substring(2),16)), // nonce
-                bigIntegerToBytes(gasPrice), // gas price
-                bigIntegerToBytes(new BigInteger(gasEstimateResult.substring(2),16)), // gas limit
+        Transaction t = new Transaction(Utility.bigIntegerToBytes(myWallet.nonce()), // nonce
+        		Utility.bigIntegerToBytes(gasPrice), // gas price
+        		Utility.bigIntegerToBytes(new BigInteger(gasEstimateResult.substring(2),16)), // gas limit
                 ByteUtil.hexStringToBytes(tokenAddr), // to id
-                bigIntegerToBytes(value), // value
+                Utility.bigIntegerToBytes(value), // value
                 functionBytes, 42);// chainid
-        t.sign(keyPair);
+        myWallet.signTransaction(t);
         String signedTrans = "0x" + new String(org.apache.commons.codec.binary.Hex.encodeHex(t.getEncoded()));
         String mintSendRawTransactionString = "{\"method\":\"eth_sendRawTransaction\",\"params\":[\""
                 + signedTrans + "\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
@@ -929,10 +814,25 @@ public class MicroRaiden {
         return blockNumber;
 	}
     
+    public void getAccountInfo(String accountName) {
+    	Wallet myWallet=null;
+    	try {
+    		myWallet=new Wallet(accountName);
+        	myWallet.update(httpAgent);
+    	}catch(Exception e) {
+    		System.out.println("Cannot retrive for "+accountName);
+    		return;
+    	}
+    	System.out.println("**********************************************");
+    	System.out.println("AccountName:\t"+myWallet.accountName());
+    	System.out.println("AccountID:\t"+myWallet.getAccountID());
+    	System.out.println("AccountNonce:\t"+myWallet.nonce().toString(10));
+    	System.out.println("AccountBalance:\t"+myWallet.etherBalance().toString(10));
+    	System.out.println("**********************************************");
+    }
     public void getEtherBalance(String accountName){
     	JSONParser parser = new JSONParser();
     	JSONObject jobj=new JSONObject();
-    	ECKey keyPair = new ECKey();
         try {     
         	jobj = (JSONObject)parser.parse(new FileReader(accountName+".pkey"));
             
@@ -946,15 +846,8 @@ public class MicroRaiden {
         	System.out.println("Couldn't parse contents in " + accountName + ".pkey as a JSON object.");
         	return;
         }
-        String  privateKeyHex = (String) jobj.get("privkey");
-        try{
-            keyPair=ECKey.fromPrivate(Hex.decodeHex(privateKeyHex.toCharArray()));
-        }catch (DecoderException e) {
-        	System.out.println("Couldn't create ECKey with privateKeyHex = " + privateKeyHex);
-        	return;
-        } 
         
-        String address = "0x"+new String(Hex.encodeHex(keyPair.getAddress()));
+        String address = "0x"+(String) jobj.get("address");
 
         String requestString="{\"method\":\"eth_getBalance\",\"params\":[\""+address+"\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
         //System.out.println("The request string in getEtherBalance is "+requestString);
