@@ -438,7 +438,7 @@ public class MicroRaiden {
         }
         String cooperativeCloseGasEstimate="";
     	try {
-    		cooperativeCloseGasEstimate=httpAgent.getHttpResponse(querycooperativeCloseGasString);
+    		cooperativeCloseGasEstimate=(String)httpAgent.getHttpResponse(querycooperativeCloseGasString);
         }catch (IOException e) {
         	System.out.println("Invoking function with given arguments is not allowed.");
     		return;
@@ -460,7 +460,7 @@ public class MicroRaiden {
         
     	String myTransactionID="";
     	try {
-    		myTransactionID=httpAgent.getHttpResponse(cooperativeCloseSendRawTransactionString);
+    		myTransactionID=(String)httpAgent.getHttpResponse(cooperativeCloseSendRawTransactionString);
         }catch (IOException e) {
         	System.out.println("Fail to execute HTTP request.");
     		return;
@@ -472,16 +472,7 @@ public class MicroRaiden {
         }
         //if(debugInfo) {
         	System.out.println("\bChannel has been closed.");  	
-        //}
-        
-    	
-    }
-    /**
-     * Lists the balances for a particular account and any balance
-     * in the channel with the given remote peer
-     */
-    public void listBalances(String account, String remotePeer) {
-        
+        //}	
     }
     
     public void getTokenBalance(String accountName){
@@ -510,12 +501,12 @@ public class MicroRaiden {
         }
         String myTokenBalance="";
         try {
-        	myTokenBalance=httpAgent.getHttpResponse(requestString);
+        	myTokenBalance=(String)httpAgent.getHttpResponse(requestString);
         }catch (IOException e) {
         	System.out.println("Cannot get token balance for "+accountName);
     		return;
         }
-    	System.out.println("Balance of "+accountName+" = "+new Float(new BigInteger(myTokenBalance.substring(2),16).floatValue()/(new BigInteger(appendingZerosForTKN,10).floatValue())).toString()+" TKN");
+    	System.out.println("Balance of "+accountName+" = "+new Float(new BigInteger(myTokenBalance.substring(2),16).doubleValue()/(new BigInteger(appendingZerosForTKN,10).doubleValue())).toString()+" TKN");
     	
     }
    
@@ -571,7 +562,7 @@ public class MicroRaiden {
         }
         String approveGasEstimate="";
     	try {
-    		approveGasEstimate=httpAgent.getHttpResponse(queryApproveGasString);
+    		approveGasEstimate=(String)httpAgent.getHttpResponse(queryApproveGasString);
         }catch (IOException e) {
         	System.out.println("Invoking function with given arguments is not allowed.");
     		return;
@@ -594,7 +585,7 @@ public class MicroRaiden {
         
     	String myTransactionID1="";
     	try {
-    		myTransactionID1=httpAgent.getHttpResponse(approveSendRawTransactionString);
+    		myTransactionID1=(String)httpAgent.getHttpResponse(approveSendRawTransactionString);
         }catch (IOException e) {
         	System.out.println("Fail to execute HTTP request.");
     		return;
@@ -634,7 +625,7 @@ public class MicroRaiden {
         }
         String creatChannelGasEstimate="";
     	try {
-    		creatChannelGasEstimate=httpAgent.getHttpResponse(queryCreatChannelGasString);
+    		creatChannelGasEstimate=(String)httpAgent.getHttpResponse(queryCreatChannelGasString);
         }catch (IOException e) {
         	System.out.println("Invoking function with given arguments is not allowed.");
     		return;
@@ -656,7 +647,7 @@ public class MicroRaiden {
         
     	String myTransactionID2="";
     	try {
-    		myTransactionID2=httpAgent.getHttpResponse(createChannelSendRawTransactionString);
+    		myTransactionID2=(String)httpAgent.getHttpResponse(createChannelSendRawTransactionString);
         }catch (IOException e) {
         	System.out.println("Fail to execute HTTP request.");
     		return;
@@ -732,7 +723,7 @@ public class MicroRaiden {
                 "\"id\":42,\"jsonrpc\":\"2.0\"}";
         String gasEstimateResult="";
     	try {
-    		gasEstimateResult=httpAgent.getHttpResponse(queryGasString);
+    		gasEstimateResult=(String)httpAgent.getHttpResponse(queryGasString);
         }catch (IOException e) {
         	System.out.println("Invoking function with given arguments is not allowed.");
     		return;
@@ -767,13 +758,14 @@ public class MicroRaiden {
         
     	String myTransactionID="";
     	try {
-    		myTransactionID=httpAgent.getHttpResponse(mintSendRawTransactionString);
+    		myTransactionID=(String)httpAgent.getHttpResponse(mintSendRawTransactionString);
         }catch (IOException e) {
         	System.out.println("Fail to execute HTTP request.");
     		return;
         }
     	
         if(!"".equals(myTransactionID)) {
+        	System.out.println("Waiting for Kovan to mine transactions ... ");
         	waitingForTransaction(myTransactionID);
         }
         System.out.println("\bYou have been given 50 tokens.");
@@ -792,41 +784,19 @@ public class MicroRaiden {
     	}
 		boolean loop=true;
 		String blockNumber=new String();
+		Object tempObj=null;
+        String queryTransactionString = "{\"method\":\"eth_getTransactionReceipt\"," +
+                "\"params\":[\"" +
+                myTransactionID +
+                "\"]," +
+                "\"id\":42,\"jsonrpc\":\"2.0\"}";
         while(loop){
-        	Object tempObj=null;
+        	
         	try {
-                CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-                HttpPost request = new HttpPost(rpcAddress);     
-                request.addHeader("content-type", "application/json");
-                String queryTransactionString = "{\"method\":\"eth_getTransactionReceipt\"," +
-                        "\"params\":[\"" +
-                        myTransactionID +
-                        "\"]," +
-                        "\"id\":42,\"jsonrpc\":\"2.0\"}";
-                StringEntity params = new StringEntity(queryTransactionString);
-                request.setEntity(params);
-                CloseableHttpResponse response = httpClient.execute(request);
-                String temp =new BasicResponseHandler().handleResponse(response);
-                response.close();
-                httpClient.close();
-              
-                JSONParser parser = new JSONParser();
-                JSONObject jobj=(JSONObject)parser.parse(temp);
-                for (Object key : jobj.keySet()) {
-                    if (((String)key).equalsIgnoreCase("result")) {
-                    	tempObj=jobj.get(key);
-                    }
-                }
-            }catch (UnsupportedEncodingException e) {
-            	System.out.println("UnsupportedEncodingException: "+e);
-            }catch (ClientProtocolException e) {
-            	System.out.println("ClientProtocolException: "+e);
+        		tempObj=httpAgent.getHttpResponse(queryTransactionString);
             }catch (IOException e) {
-            	System.out.println("IOException: "+e);
-            }catch(ParseException e) {
-            	System.out.println("ParseException: "+e);
-            }catch (NumberFormatException e){
-            	System.out.println("NumberFormatException="+e);
+            	System.out.println("Fail to execute HTTP request.");
+        		return "";
             }
             if(tempObj==null){
                 //do nothing

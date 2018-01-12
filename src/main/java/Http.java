@@ -33,10 +33,10 @@ public class Http {
 	 * @return the result of the HTTP request
 	 * @throws IOException
 	 */
-	public String getHttpResponse(String requestString) throws IOException{
+	public Object getHttpResponse(String requestString) throws IOException{
     	JSONParser parser = new JSONParser();
     	JSONObject jobj=new JSONObject();
-        String executionResult="";
+        Object executionResult=null;
         String temp="";
     	try {
     		CloseableHttpClient httpClient = HttpClientBuilder.create().build();
@@ -56,10 +56,7 @@ public class Http {
             }
             for (Object key : jobj.keySet()) {
                 if (((String)key).equalsIgnoreCase("result")) {
-                	executionResult=(String) jobj.get(key);
-                    if(debugInfo) {
-                    	System.out.println("result = "+executionResult);
-                    }
+                	executionResult=jobj.get(key);
                 }
             }
         }catch (UnsupportedEncodingException e) {

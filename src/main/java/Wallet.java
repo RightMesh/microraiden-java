@@ -42,7 +42,7 @@ public class Wallet {
     	String queryNonceString="{\"method\":\"parity_nextNonce\",\"params\":[\"0x"+Hex.encodeHexString(ecKeyPair.getAddress())+"\"],\"id\":42,\"jsonrpc\":\"2.0\"}";
     	String myNonceResult="";
     	try {
-    		myNonceResult=httpAgent.getHttpResponse(queryNonceString);
+    		myNonceResult=(String)httpAgent.getHttpResponse(queryNonceString);
         }catch (IOException e) {
         	throw e;
         }
@@ -60,7 +60,7 @@ public class Wallet {
         //System.out.println("The request string in getEtherBalance is "+requestString);
         String myEtherBalance="";
     	try {
-    		myEtherBalance=httpAgent.getHttpResponse(queryEtherBalanceString);
+    		myEtherBalance=(String)httpAgent.getHttpResponse(queryEtherBalanceString);
         }catch (IOException e) {
         	throw e;
         }
