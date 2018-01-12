@@ -33,7 +33,6 @@ public class Http {
 	 * @return the result of the HTTP request
 	 * @throws IOException
 	 */
-	
 	public String getHttpResponse(String requestString) throws IOException{
     	JSONParser parser = new JSONParser();
     	JSONObject jobj=new JSONObject();
