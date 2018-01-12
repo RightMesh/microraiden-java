@@ -1,5 +1,8 @@
 import java.math.BigInteger;
 
+import org.kocakosm.pitaya.security.Digest;
+import org.kocakosm.pitaya.security.Digests;
+
 public class Utility {
     /**
      * 
@@ -40,6 +43,15 @@ public class Utility {
         return mergedArray;
     }
     
+    /**
+     * Convert double number literal to BigInteger according to the decimal unit template. 
+     * For example, the Ether has 18 decimal units, the template should be 1000000000000000000. 
+     * The function can convert 3.141592653589793238 to 3141592653589793238 (BigInteger).
+     * @param balance double number in literal
+     * @param template literal starts with 1, followed by the number (decimal units) of zeros behind.
+     * @return The BigInteger after the conversion.
+     * @throws NumberFormatException
+     */
     public static BigInteger decimalToBigInteger(String balance, String template) throws  NumberFormatException{
     	try{
     		Double.parseDouble(balance);
@@ -59,6 +71,11 @@ public class Utility {
     	return tempBalance;
     }
     
+    /**
+     * Convert BigInteger to the byte array used as arguments of calling smart contract functions.
+     * @param value the BigInteger to be changed to byte array.
+     * @return the byte array sent to contract functions.
+     */
 	public static byte[] bigIntegerToBytes(BigInteger value) {
         if (value == null)
             return null;
@@ -71,5 +88,17 @@ public class Utility {
             data = tmp;
         }
         return data;
+    }
+	
+	/**
+	 * Calculate the SHA3 (a.k.a. Keccak) hash value of messageToBeHashed
+	 * @param messageToBeHashed the message to be hashed in byte array
+	 * @return
+	 */
+	public static byte[] getSHA3HashHex(byte[] messageToBeHashed) {
+        Digest keccak256 = Digests.keccak256();
+        keccak256.reset();
+        keccak256.update(messageToBeHashed);
+        return keccak256.digest();
     }
 }

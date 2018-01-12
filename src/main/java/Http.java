@@ -16,11 +16,24 @@ public class Http {
 	 
 	private String rpcAddress;
 	private boolean debugInfo;
+	/**
+	 * 
+	 * @param _rpcAddress the rpc URL
+	 * @param _debug debug info switch
+	 */
 	public Http(String _rpcAddress, boolean _debug) {
 		rpcAddress=_rpcAddress;
 		debugInfo=_debug;
 				
 	}
+	
+	/**
+	 * This function is to send RPC request to the running peer.
+	 * @param requestString the HTTP request string
+	 * @return the result of the HTTP request
+	 * @throws IOException
+	 */
+	
 	public String getHttpResponse(String requestString) throws IOException{
     	JSONParser parser = new JSONParser();
     	JSONObject jobj=new JSONObject();
