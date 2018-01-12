@@ -21,7 +21,8 @@ We have deployed the [CustomToken](https://kovan.etherscan.io/address/0x0fc37342
 ### Running
 ```
 ./gradlew run
-``` or 
+``` 
+or 
 ```
 ./build/install/microraiden-java/bin/microraiden-java
 ```
