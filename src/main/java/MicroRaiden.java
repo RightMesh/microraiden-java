@@ -133,6 +133,8 @@ public class MicroRaiden {
      * .pkey extension.
      */
     public void listAccounts() {
+    	JSONParser parser = new JSONParser();
+    	JSONObject jobj=new JSONObject();
         File dir = new File(".");
         File[] filesList = dir.listFiles();
         for (File file : filesList) {
@@ -140,13 +142,9 @@ public class MicroRaiden {
                 if(file.getName().contains(".pkey")) {
                     //System.out.println(file.getName());
                     try {
-                        InputStream is = new FileInputStream(file.getName());
-                        byte[] priv = IOUtils.toByteArray(is);
-                        is.close();
-                        ECKey keyPair = ECKey.fromPrivate(priv);
-                        String address = new String(Hex.encodeHex(keyPair.getAddress()));
-                        System.out.println("0x" + address);
-                    } catch(IOException ex) {
+                    	jobj = (JSONObject)parser.parse(new FileReader(file.getName()));
+                        System.out.println("0x" + ((String)jobj.get("address")));
+                    } catch(Exception ex) {
                         System.out.println("Couldn't read from file: " + file.getName() + " " + ex.toString());
                     }
                 }
