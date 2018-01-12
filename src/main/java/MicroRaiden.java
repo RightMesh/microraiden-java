@@ -874,7 +874,7 @@ public class MicroRaiden {
     	System.out.println("AccountName:\t"+myWallet.accountName());
     	System.out.println("AccountID:\t"+myWallet.getAccountID());
     	System.out.println("AccountNonce:\t"+myWallet.nonce().toString(10));
-    	System.out.println("AccountBalance:\t"+myWallet.etherBalance().toString(10));
+    	System.out.println("AccountBalance:\t"+myWallet.etherBalance().toString(10)+" (Wei)");
     	System.out.println("**********************************************");
     }
     
